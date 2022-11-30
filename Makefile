@@ -6,7 +6,7 @@
 #    By: wkonings <wkonings@student.codam.nl>         +#+                      #
 #                                                    +#+                       #
 #    Created: 2019/10/29 16:21:56 by wkonings      #+#    #+#                  #
-#    Updated: 2022/11/13 01:30:19 by root          ########   odam.nl          #
+#    Updated: 2022/11/29 23:37:21 by wkonings      ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,8 +14,8 @@
 #todo: also make sure the header is up to date when constructing .o files i think
 # --------------- VARIABLES ---------------#
 
-NAME = minishell
-FLAGS = -Wall -Wextra -Werror
+NAME = phil
+FLAGS = #-Wall -Wextra -Werror
 DEBUG = -g #-fsanitize=address
 CC = gcc
 
@@ -34,7 +34,7 @@ INC			:= -I include
 HEADER_FILES:= $(INCLUDE_DIR)/philosophers.h
 HEADERS		:=	$(addprefix $(INCLUDE_DIR)/, $(HEADER_FILES))
 
-FILES		:=	philosophers
+FILES		:=	philosophers utils init
 
 SRCS		:=	$(addprefix $(SRC_DIR)/,$(FILES:%=%.c))
 OBJS		:=	$(addprefix $(OBJ_DIR)/,$(notdir $(SRCS:%.c=%.o)))
@@ -74,6 +74,9 @@ fclean:	clean
 re: fclean all
 
 test: $(NAME)
+	./$(NAME)
+
+pog:
 	@echo ⣿⣿⣿⣿⡿⠟⠛⠛⠛⠛⠉⠉⠙⠛⠛⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠿⠟
 	@echo ⣿⣿⣯⣥⣤⣶⣶⣶⣶⣿⣿⣿⣿⣿⣿⣷⣾⣿⣿⣿⣿⣿⣿⣿⣏⣀⣀⣀⡀
 	@echo ⣿⣿⣿⣿⣿⣿⣿⡿⠿⠛⠛⠻⠿⠟⠉⠉⠉⢻⣿⣿⣿⡿⠟⠋⣡⣼⣿⣿⣿⡄
@@ -89,6 +92,5 @@ test: $(NAME)
 	@echo ⠛⠛⣿⣿⣿⣿⣿⣿⣿⠉⠛⢶⣶⣄⠀⠀⠀⠀⠀⠀⠀⠀⡇
 	@echo ⠠⣾⣿⣿⣿⣿⣿⠿⠟⠃⠀⠀⠀⠈⠲⣴⣦⣤⣤⣤⣶⡾⠁
 	@echo ⠄⠈⠉⠻⢿⣿⣿⡀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠛⠛⠉
-	./$(NAME)
 
-.PHONY: clean fclean re test
+.PHONY: all clean fclean re test
