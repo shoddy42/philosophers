@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 09:12:20 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/01 04:42:52 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/01 07:53:01 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,15 +24,15 @@
 // 	return (ret);	
 // }
 
-long	time_(struct timeval time, t_deep *thoughts)
-{
-	long	ret;
+// long	time_(struct timeval time, t_deep *thoughts)
+// {
+// 	long	ret;
 
 
-	ret = ((time.tv_sec * 1000 + time.tv_usec / 1000)) - ((thoughts->epoch.tv_sec * 1000 + thoughts->epoch.tv_usec / 1000));
-	// printf ("time: [%li]\n", ret);
-	return (ret);	
-}
+// 	ret = ((time.tv_sec * 1000 + time.tv_usec / 1000)) - ((thoughts->epoch.tv_sec * 1000 + thoughts->epoch.tv_usec / 1000));
+// 	// printf ("time: [%li]\n", ret);
+// 	return (ret);	
+// }
 
 long	get_time(void)
 {
@@ -44,21 +44,19 @@ long	get_time(void)
 
 void	ponder_death(t_phil *philo, t_deep *thoughts, int time)
 {
-	struct timeval delta;
-	struct timeval start;
+	long delta;
+	long start;
 
-	gettimeofday(&start, NULL);
-	gettimeofday(&delta, NULL);
-	while (time_(delta, thoughts) - time_(start, thoughts) < time)
+	start = get_time();
+	delta = get_time() - start;
+	while (delta < time)
 	{
-		gettimeofday(&delta, NULL);
-		// printf ("time delta [%li], death time [%i]\n", (time_(delta, thoughts) - time_(philo->last_supper, thoughts)), thoughts->variables[TT_DIE]);
-		if (time_(delta, thoughts) - time_(philo->last_supper, thoughts) > thoughts->variables[TT_DIE])
+		delta = get_time() - start;
+		if (delta > thoughts->variables[TT_DIE])
 		{
-			printf ("%li DEATH HAS OCCURED! %i has died. Last sup [%li]. Death [%li] diff [%li]\n", time_(delta, thoughts), philo->id, time_(philo->last_supper, thoughts), time_(delta, thoughts), time_(delta, thoughts) - time_(philo->last_supper, thoughts));
+			printf ("%li %i has died\n", delta, philo->id);
 			exit (0);
 		}
-		// printf ("time [%li]\n", time_(delta, thoughts) - time_(start, thoughts));
 		usleep (50);
 	}
 }
@@ -66,47 +64,41 @@ void	ponder_death(t_phil *philo, t_deep *thoughts, int time)
 void *yes(void *param)
 {
 	t_phil			*philo;
-	struct timeval	t;
-	struct timeval	start;
-
+	t_deep			*thoughts;
 
 	philo = param;
-	// if (philo->id != 1)
-	// 	return (NULL);
+	thoughts = philo->thoughts;
+	philo->last_supper = thoughts->epoch;
+	pthread_mutex_lock(&thoughts->sync);
+	pthread_mutex_unlock(&thoughts->sync);
+
 	while (philo->meals > 0)
 	{
 		//GRAB FORKS.
 
-		gettimeofday(&t, NULL);
-		printf ("%li %i is thinking\n", time_(t, philo->thoughts), philo->id);
+		printf ("%li is thinking\n", get_time() - thoughts->epoch);
 		//when philosopher X is eating he takes fork X and fork X - 1
 		pthread_mutex_lock(philo->left);
-		gettimeofday(&t, NULL);
-		printf ("%li %i has taken a fork\n", time_(t, philo->thoughts), philo->id);
+		printf ("%li %i has taken a fork\n", get_time() - thoughts->epoch, philo->id);
 
 		pthread_mutex_lock(philo->right);
-		gettimeofday(&t, NULL);
-		printf ("%li %i has taken a fork\n", time_(t, philo->thoughts), philo->id);
+		printf ("%li %i has taken a fork\n", get_time() - thoughts->epoch, philo->id);
 
 		//EAT WHILE PONDERING DEATH.
-		gettimeofday(&t, NULL);
-		printf ("%li %i is eating for [%i], last meal at [%li]. Forks [%i][%i] are locked.\n", time_(t, philo->thoughts), philo->id, philo->thoughts->variables[TT_EAT], time_(philo->last_supper, philo->thoughts), philo->id, philo->id - 1 < 1 ? philo->thoughts->variables[NB_PHILOS] : philo->id - 1);
-		gettimeofday(&philo->last_supper, NULL);
-
+		printf ("%li %i is eating\n", get_time() - thoughts->epoch, philo->id);
+		// printf ("%li %i is eating for [%i], last meal at [%li]. Forks [%i][%i] are locked.\n", get_time(), philo->id, philo->thoughts->variables[TT_EAT], time_(philo->last_supper, philo->thoughts), philo->id, philo->id - 1 < 1 ? philo->thoughts->variables[NB_PHILOS] : philo->id - 1);
+		philo->last_supper = get_time();
 			ponder_death(philo, philo->thoughts, philo->thoughts->variables[TT_EAT]);
 
 		//finished eating. continue to ponder.
 		pthread_mutex_unlock(philo->left);
 		pthread_mutex_unlock(philo->right);
 		// printf ("%li %i finished eating, %i meals remain\n", time_(t, philo->thoughts), philo->id, philo->meals);
-		gettimeofday(&t, NULL);
-		printf ("%li %i is sleeping for [%i]\n", time_(t, philo->thoughts), philo->id, philo->thoughts->variables[TT_SLEEP]);
-		//replace with ponder_death
-			// usleep(philo->thoughts->variables[TT_SLEEP]);
+		printf ("%li %i is sleeping\n", get_time() - thoughts->epoch, philo->id);
+		// printf ("%li %i is sleeping for [%i]\n", time_(t, philo->thoughts), philo->id, philo->thoughts->variables[TT_SLEEP]);
 
 		//finished sleeping
 		ponder_death(philo, philo->thoughts, philo->thoughts->variables[TT_SLEEP]);
-		gettimeofday(&t, NULL);
 		// printf ("[%li] [%i] is finished sleeping\n", time_(t, philo->thoughts), philo->id);
 		// usleep(philo->thoughts->variables[TT_SLEEP]);
 		philo->meals--;
@@ -155,14 +147,13 @@ void	*watch_threads(void *param)
 	while (!thoughts->satisfied)
 	{
 		i = -1;
-		gettimeofday(&time, NULL);
 		while (++i < thoughts->variables[NB_PHILOS])
 		{
-			if (time_(time, thoughts) - time_(thoughts->philosophers[i].last_supper, thoughts) > thoughts->variables[TT_DIE])
+			if (get_time() - thoughts->philosophers[i].last_supper > (long)thoughts->variables[TT_DIE])
 			{
-
-				printf ("%li %i DEAD MAN WALKING!\n", time_(time, thoughts), thoughts->philosophers[i].id);			
+				printf ("%li %i DEAD MAN WALKING!\n", get_time() - thoughts->epoch, thoughts->philosophers[i].id);
 				exit (0);
+				return (NULL);
 			}
 		}
 	}
@@ -176,19 +167,21 @@ int main(int ac, char **av)
 	thoughts = ft_calloc(1, sizeof(t_deep));
 	if (!thoughts)
 		exit (EXIT_FAILURE);
+	// thoughts->epoch = 56;
 	//SET DEBUG LEVEL
 	thoughts->debuglevel = 5;
 
 
 	init_deepthought(ac, av, thoughts); //todo: setup failstate
-	init_time(thoughts);
-
 	//later: remove
 	// init_log(thoughts);
+	pthread_mutex_lock(&thoughts->sync);
+	init_time(thoughts);
 	create_threads(thoughts);
-	// watch_threads(thoughts);
-	pthread_create(&thoughts->plato, NULL, watch_threads, (void *)thoughts);
-	// printf ("TEST HELLO!\n");
+	pthread_mutex_unlock(&thoughts->sync);
+	watch_threads(thoughts);
+	// pthread_create(&thoughts->plato, NULL, watch_threads, (void *)thoughts);
 	join_threads(thoughts);
+	// exit (0);
 	return (0);
 }

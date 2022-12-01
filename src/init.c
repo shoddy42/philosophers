@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 08:27:04 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/01 02:38:56 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/01 07:48:47 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@ int		init_philo(t_deep *thoughts)
 		thoughts->philosophers[i].id = i + 1;
 		thoughts->philosophers[i].meals = thoughts->variables[NB_MEALS];
 		thoughts->philosophers[i].thoughts = thoughts;
-		thoughts->philosophers[i].last_supper = thoughts->epoch;
 		// printf("init [%i]\n", thoughts->philosophers[i].id);
 		thoughts->philosophers[i].right = ft_calloc(1, sizeof(pthread_mutex_t));
 		pthread_mutex_init(thoughts->philosophers[i].right, NULL);
@@ -41,9 +40,9 @@ void	init_time(t_deep *thoughts)
 {
 	int	i;
 
-	gettimeofday(&thoughts->epoch, NULL);
 	i = -1;
-	// printf ("start time: %li\n", time_(thoughts->epoch, thoughts));
+	thoughts->epoch = get_time();
+	// printf ("start time: %li\n", thoughts->epoch);
 	while (++i < thoughts->variables[NB_PHILOS])
 		thoughts->philosophers[i].last_supper = thoughts->epoch;
 	
@@ -58,9 +57,6 @@ void	init_log(t_deep *thoughts)
 
 int		init_deepthought(int ac, char **av, t_deep *thoughts)
 {
-	if(gettimeofday(&thoughts->epoch, NULL) < 0)
-		exit (52);
-	// printf ("epoch? [%li] start = [%li]\n", (thoughts->epoch.tv_sec * 1000000) + thoughts->epoch.tv_usec, time_(thoughts->epoch, thoughts));
 	if (ac >= 5)
 	{
 		thoughts->variables[NB_PHILOS] = ft_atoi(av[NB_PHILOS + 1]);

@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 09:12:24 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/01 04:34:08 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/01 07:41:11 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ typedef struct s_philosopher
 	pthread_mutex_t	*left;
 	pthread_mutex_t	*right;
 	
-	struct timeval	last_supper;
+	long			last_supper;
 	int				meals;
 	int				id;
 	t_deep			*thoughts;
@@ -88,8 +88,7 @@ typedef struct s_deepthought
 {
 	int				variables[5];
 	t_phil			*philosophers;
-	struct timeval	epoch;
-	long			init_time;
+	long			epoch;
 
 	pthread_t		plato;
 	pthread_mutex_t	sync;
@@ -114,6 +113,7 @@ void	init_time(t_deep *thoughts);
 
 // REMOVE FILES
 void	init_log(t_deep *thoughts);
+long	get_time(void);
 
 
 #endif
