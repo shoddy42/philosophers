@@ -6,7 +6,7 @@
 #    By: wkonings <wkonings@student.codam.nl>         +#+                      #
 #                                                    +#+                       #
 #    Created: 2019/10/29 16:21:56 by wkonings      #+#    #+#                  #
-#    Updated: 2022/11/29 23:37:21 by wkonings      ########   odam.nl          #
+#    Updated: 2022/11/30 22:05:35 by wkonings      ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -43,7 +43,7 @@ OBJS		:=	$(addprefix $(OBJ_DIR)/,$(notdir $(SRCS:%.c=%.o)))
 # --------------- RECIPES -----------------#
 # -----------------------------------------#
 
-$(NAME): $(OBJS) #$(HEADER_FILES)
+$(NAME): $(OBJS) $(HEADER_FILES)
 	gcc $(DEBUG) $(SRCS) -o $(NAME) $(INC) $(INCLUDES)
 
 echo:

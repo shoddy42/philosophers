@@ -6,16 +6,16 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 08:27:04 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/11/30 01:18:14 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/01 02:38:56 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/philosophers.h"
 
+//todo: error handling
 int		init_philo(t_deep *thoughts)
 {
 	int i;
-	pthread_mutex_t test;
 	thoughts->philosophers = ft_calloc(thoughts->variables[NB_PHILOS], sizeof(t_phil));
 	if (!thoughts->philosophers)
 		exit (-1);
@@ -23,8 +23,12 @@ int		init_philo(t_deep *thoughts)
 	while (++i < thoughts->variables[NB_PHILOS])
 	{
 		thoughts->philosophers[i].id = i + 1;
-		printf("init [%i]\n", thoughts->philosophers[i].id);
-		pthread_mutex_init(&thoughts->philosophers[i].right, NULL);
+		thoughts->philosophers[i].meals = thoughts->variables[NB_MEALS];
+		thoughts->philosophers[i].thoughts = thoughts;
+		thoughts->philosophers[i].last_supper = thoughts->epoch;
+		// printf("init [%i]\n", thoughts->philosophers[i].id);
+		thoughts->philosophers[i].right = ft_calloc(1, sizeof(pthread_mutex_t));
+		pthread_mutex_init(thoughts->philosophers[i].right, NULL);
 		if (i > 0)
 			thoughts->philosophers[i].left = thoughts->philosophers[i - 1].right;
 	}
@@ -33,9 +37,30 @@ int		init_philo(t_deep *thoughts)
 	return (0);
 }
 
+void	init_time(t_deep *thoughts)
+{
+	int	i;
+
+	gettimeofday(&thoughts->epoch, NULL);
+	i = -1;
+	// printf ("start time: %li\n", time_(thoughts->epoch, thoughts));
+	while (++i < thoughts->variables[NB_PHILOS])
+		thoughts->philosophers[i].last_supper = thoughts->epoch;
+	
+}
+
+//later: remove
+void	init_log(t_deep *thoughts)
+{
+	thoughts->log = open("philosophers.log\n", O_CREAT | O_TRUNC | O_RDWR, 0644);
+	dup2(thoughts->log, STDOUT_FILENO);
+}
 
 int		init_deepthought(int ac, char **av, t_deep *thoughts)
 {
+	if(gettimeofday(&thoughts->epoch, NULL) < 0)
+		exit (52);
+	// printf ("epoch? [%li] start = [%li]\n", (thoughts->epoch.tv_sec * 1000000) + thoughts->epoch.tv_usec, time_(thoughts->epoch, thoughts));
 	if (ac >= 5)
 	{
 		thoughts->variables[NB_PHILOS] = ft_atoi(av[NB_PHILOS + 1]);
@@ -45,6 +70,8 @@ int		init_deepthought(int ac, char **av, t_deep *thoughts)
 		thoughts->variables[NB_MEALS]  = 1;
 		if (ac == 6)
 			thoughts->variables[NB_MEALS]  = ft_atoi(av[NB_MEALS + 1]);
+		if (ac > 6)
+			printf ("too many args bruh\n");
 	}
 	else
 	{
