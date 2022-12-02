@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 09:12:24 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/02 13:18:27 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/02 14:00:45 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,13 +29,13 @@
 # define DEFAULT_NB_MEALS 8
 
 # define FORMAT_MSG "%8li %i %s\n"
-# define FORK_MSG "has taken fork 1"
-# define FORK2_MSG "has taken fork 2"
-# define EATING_MSG "is eating"
-# define SLEEPING_MSG "is sleeping"
-# define THINKING_MSG "is thinking"
+# define FORK_MSG "\1\33[38;5;117mhas taken fork 1\2\1\33[0m\2\3"
+# define FORK2_MSG "\1\33[38;5;117mhas taken fork 2\2\1\33[0m\2\3"
+# define EATING_MSG "\1\33[38;5;198mis eating\2\1\33[0m\2\3"
+# define SLEEPING_MSG "\1\33[38;5;135mis sleeping\2\1\33[0m\2\3"
+# define THINKING_MSG "\1\33[38;5;27mis thinking\2\1\33[0m\2\3"
 // # define DEATH_MSG "has died"
-# define DEATH_MSG "\1\33[38;5;182m has died\2\3"
+# define DEATH_MSG "\1\33[38;5;196mhas died\2\3"
 
 
 
