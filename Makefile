@@ -6,7 +6,7 @@
 #    By: wkonings <wkonings@student.codam.nl>         +#+                      #
 #                                                    +#+                       #
 #    Created: 2019/10/29 16:21:56 by wkonings      #+#    #+#                  #
-#    Updated: 2022/11/30 22:05:35 by wkonings      ########   odam.nl          #
+#    Updated: 2022/12/02 12:55:10 by wkonings      ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,9 +14,11 @@
 #todo: also make sure the header is up to date when constructing .o files i think
 # --------------- VARIABLES ---------------#
 
-NAME = phil
-FLAGS = #-Wall -Wextra -Werror
-DEBUG = -g #-fsanitize=address
+
+#todo: FLAGS
+NAME = philo
+FLAGS = -pthread -g #-Wall -Wextra -Werror
+DEBUG = -g -fsanitize=thread
 CC = gcc
 
 # --------------- DIRECTORIES ------------ #
@@ -34,7 +36,7 @@ INC			:= -I include
 HEADER_FILES:= $(INCLUDE_DIR)/philosophers.h
 HEADERS		:=	$(addprefix $(INCLUDE_DIR)/, $(HEADER_FILES))
 
-FILES		:=	philosophers utils init
+FILES		:=	philosophers gods poet utils init
 
 SRCS		:=	$(addprefix $(SRC_DIR)/,$(FILES:%=%.c))
 OBJS		:=	$(addprefix $(OBJ_DIR)/,$(notdir $(SRCS:%.c=%.o)))
@@ -44,6 +46,9 @@ OBJS		:=	$(addprefix $(OBJ_DIR)/,$(notdir $(SRCS:%.c=%.o)))
 # -----------------------------------------#
 
 $(NAME): $(OBJS) $(HEADER_FILES)
+	gcc $(FLAGS) $(SRCS) -o $(NAME) $(INC) $(INCLUDES)
+
+debug: $(OBJS) $(HEADER_FILES)
 	gcc $(DEBUG) $(SRCS) -o $(NAME) $(INC) $(INCLUDES)
 
 echo:

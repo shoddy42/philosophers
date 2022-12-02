@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 09:12:24 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/01 07:41:11 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/02 13:18:27 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,12 +28,20 @@
 # define DEFAULT_TT_SLEEP 500
 # define DEFAULT_NB_MEALS 8
 
+# define FORMAT_MSG "%8li %i %s\n"
+# define FORK_MSG "has taken fork 1"
+# define FORK2_MSG "has taken fork 2"
+# define EATING_MSG "is eating"
+# define SLEEPING_MSG "is sleeping"
+# define THINKING_MSG "is thinking"
+// # define DEATH_MSG "has died"
+# define DEATH_MSG "\1\33[38;5;182m has died\2\3"
 
 
 
-
-// end of cursed zone 
+// end of cursed zone
 typedef struct s_deepthought	t_deep;
+typedef pthread_mutex_t			t_mutex;
 
 /** 
  * @brief	Enumerators for clarity when accessing
@@ -64,17 +72,43 @@ typedef enum e_state
 	THIEVING,
 }	t_state;
 
+typedef enum e_message_types
+{
+	FORK,
+	FORK2,
+	EAT,
+	SLEEP,
+	THINK,
+	DIE,
+	END
+} t_msg_type;
+
+typedef struct s_message
+{
+	t_msg_type	type;
+	long		time;
+	int			id;
+}	t_msg;
+
+typedef struct s_poetspen
+{
+	const char	*msgs[7];
+	t_msg		*queue;
+	int			size;
+	int			max;
+}	t_log;
 
 typedef struct s_philosopher
 {
-	pthread_t		thread;
-	pthread_mutex_t	*left;
-	pthread_mutex_t	*right;
+	pthread_t	thread;
+	t_mutex		*left;
+	t_mutex		*right;
+	t_mutex		soul;
 	
-	long			last_supper;
-	int				meals;
-	int				id;
-	t_deep			*thoughts;
+	long		last_supper;
+	int			meals;
+	int			id;
+	t_deep		*thoughts;
 }	t_phil;
 
 /**
@@ -86,21 +120,31 @@ typedef struct s_philosopher
  */
 typedef struct s_deepthought
 {
-	int				variables[5];
-	t_phil			*philosophers;
-	long			epoch;
+	int			variables[5];
+	t_phil		*philosophers;
+	long		epoch;
 
-	pthread_t		plato;
-	pthread_mutex_t	sync;
-	bool			satisfied;
+
+	pthread_t	shakespeare;
+	t_mutex		writers_block;
+	t_log		*log;
+
+	t_mutex		sync;
+
+	int			satisfied;
+	bool		oblivion;
 
 	//debug zone
-	int	debuglevel;
-	int	log;
+	int	fd;
 }	t_deep;
 
 // philosophers.c
-long	time_(struct timeval time, t_deep *thoughts);
+long	get_time(void);
+void 	*yes(void *param);
+bool	confirm_reality(t_deep *thoughts);
+void	end_universe(t_deep *thoughts);
+bool	ponder_death(t_phil *philo, t_deep *thoughts, int time);
+bool	confirm_reality(t_deep *thoughts);
 
 // utils.c
 void	*ft_calloc(size_t count, size_t size);
@@ -109,11 +153,20 @@ int		ft_atoi(const char *nb);
 // init.c
 int		init_deepthought(int ac, char **av, t_deep *thoughts);
 void	init_time(t_deep *thoughts);
+void	create_threads(t_deep *thoughts);
+void	join_threads(t_deep *thoughts);
+
+
+// gods.c
+void	*watch_threads(t_deep *thoughts);
+
+// poet.c
+void	*shakespeare(void *param);
+void	add_queue(long time, t_msg_type type, int id, t_deep *thoughts);
 
 
 // REMOVE FILES
 void	init_log(t_deep *thoughts);
-long	get_time(void);
 
 
 #endif
