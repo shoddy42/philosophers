@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/12/02 04:54:39 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/02 13:31:28 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/05 10:00:53 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ bool	thanatos(t_phil *mortal, t_deep *thoughts)
 	long	time;
 
 	time = get_time();
-	if (((time - thoughts->epoch) - (mortal->last_supper - thoughts->epoch)) <= (long)thoughts->variables[TT_DIE])
+	if ((((time - thoughts->epoch) - (mortal->last_supper - thoughts->epoch))) / 1000 <= (long)thoughts->variables[TT_DIE] / 1000)
 	{
 		return (false);
 	}
@@ -34,7 +34,9 @@ bool	thanatos(t_phil *mortal, t_deep *thoughts)
 	// printf ("?: %li\n", (time - thoughts->epoch) - (mortal->last_supper - thoughts->epoch));
 	// printf ("\1\33[38;5;182m %li %i dead. last? %li\n\2\3", (time - mortal->last_supper), mortal->id, mortal->last_supper - thoughts->epoch);
 	pthread_mutex_unlock(&mortal->soul);
+	// pthread_mutex_unlock()
 	end_universe(thoughts);
+	printf ("Hello!?\n");
 	return (true);
 }
 

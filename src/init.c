@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 08:27:04 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/02 13:22:44 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/05 09:31:42 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,22 @@ void	join_threads(t_deep *thoughts)
 	pthread_join(thoughts->shakespeare, NULL);
 }
 
+void	destroy_forks(t_deep *thoughts)
+{
+	int	i;
+	t_phil *philo;
+
+	philo = thoughts->philosophers;
+
+	i = -1;
+	while (++i < thoughts->variables[NB_PHILOS])
+	{
+		pthread_mutex_destroy(thoughts->philosophers->right);	
+	}
+	// pthread_join(thoughts->shakespeare, NULL);
+}
+
+
 //todo: error handling
 int		init_philo(t_deep *thoughts)
 {
@@ -62,8 +78,14 @@ int		init_philo(t_deep *thoughts)
 		if (i > 0)
 			thoughts->philosophers[i].left = thoughts->philosophers[i - 1].right;
 	}
-	if (i > 0)
+	printf ("i = %i\n", i);
+	if (i > 1)
+	{
+		printf ("SET LEFT!\n");
 		thoughts->philosophers[0].left = thoughts->philosophers[i - 1].right;
+	}
+	else
+		thoughts->philosophers[0].left = NULL;
 	return (0);
 }
 
@@ -82,22 +104,46 @@ void	init_log(t_deep *thoughts)
 	thoughts->log->msgs[THINK] = THINKING_MSG;
 	thoughts->log->msgs[DIE] = DEATH_MSG;
 	// thoughts->log->msgs[END] = FORK_MSG;
+	//todo: experiment with logsize
 	thoughts->log->queue = ft_calloc(1000, sizeof(t_msg));
 	
 }
 
+bool	legal_input(int ac, char **av)
+{
+	int	i;
+	int	x;
+
+	i = 0;
+	while (av[++i])
+	{
+		x = -1;
+		while (av[i][++x])
+		{
+			if ((av[i][x] < '0' || av[i][x] > '9'))
+				return (false);
+		}
+	}
+	return (true);
+}
+
 int		init_deepthought(int ac, char **av, t_deep *thoughts)
 {
-	//todo: experiment with logsize
+	if (!legal_input(ac, av))
+	{
+		printf ("Bad arguments\n");
+		exit (0);
+		
+	}
 	if (ac >= 5)
 	{
 		thoughts->variables[NB_PHILOS] = ft_atoi(av[NB_PHILOS + 1]);
-		// thoughts->variables[TT_DIE]    = 1000 * ft_atoi(av[TT_DIE + 1]);
-		// thoughts->variables[TT_EAT]    = 1000 * ft_atoi(av[TT_EAT + 1]);
-		// thoughts->variables[TT_SLEEP]  = 1000 * ft_atoi(av[TT_SLEEP + 1]);
-			thoughts->variables[TT_DIE]    = ft_atoi(av[TT_DIE + 1]);
-			thoughts->variables[TT_EAT]    = ft_atoi(av[TT_EAT + 1]);
-			thoughts->variables[TT_SLEEP]  = ft_atoi(av[TT_SLEEP + 1]);
+		thoughts->variables[TT_DIE]    = 1000 * ft_atoi(av[TT_DIE + 1]);
+		thoughts->variables[TT_EAT]    = 1000 * ft_atoi(av[TT_EAT + 1]);
+		thoughts->variables[TT_SLEEP]  = 1000 * ft_atoi(av[TT_SLEEP + 1]);
+			// thoughts->variables[TT_DIE]    = ft_atoi(av[TT_DIE + 1]);
+			// thoughts->variables[TT_EAT]    = ft_atoi(av[TT_EAT + 1]);
+			// thoughts->variables[TT_SLEEP]  = ft_atoi(av[TT_SLEEP + 1]);
 		thoughts->variables[NB_MEALS]  = 1;
 		if (ac == 6)
 			thoughts->variables[NB_MEALS]  = ft_atoi(av[NB_MEALS + 1]);
@@ -106,13 +152,19 @@ int		init_deepthought(int ac, char **av, t_deep *thoughts)
 		if (ac > 6)
 			printf ("too many args bruh\n");
 	}
-	else
+	// else
+	// {
+	// 	thoughts->variables[NB_PHILOS] = DEFAULT_NB_PHILOS;
+	// 	thoughts->variables[TT_DIE]    = DEFAULT_TT_DIE;
+	// 	thoughts->variables[TT_EAT]    = DEFAULT_TT_EAT;
+	// 	thoughts->variables[TT_SLEEP]  = DEFAULT_TT_SLEEP;
+	// 	thoughts->variables[NB_MEALS]  = DEFAULT_NB_MEALS;
+	// }
+	if (thoughts->variables[NB_PHILOS] < 0 || thoughts->variables[TT_DIE] < 0 || thoughts->variables[TT_EAT] < 0 || 
+		thoughts->variables[TT_SLEEP] < 0)
 	{
-		thoughts->variables[NB_PHILOS] = DEFAULT_NB_PHILOS;
-		thoughts->variables[TT_DIE]    = DEFAULT_TT_DIE;
-		thoughts->variables[TT_EAT]    = DEFAULT_TT_EAT;
-		thoughts->variables[TT_SLEEP]  = DEFAULT_TT_SLEEP;
-		thoughts->variables[NB_MEALS]  = DEFAULT_NB_MEALS;
+		printf ("bad input\n");
+		exit (0);
 	}
 
 	// 	printf ("philos count  = [%i]\n", thoughts->variables[NB_PHILOS]);

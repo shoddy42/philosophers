@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 09:12:24 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/02 14:00:45 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/05 10:33:42 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,12 @@
 # define DEFAULT_NB_MEALS 8
 
 # define FORMAT_MSG "%8li %i %s\n"
+// # define FORMAT_MSG "%8li %i %s for [%i]\n"
+// # define FORMAT_MSG "%8li %i %s for [%i]\n"
+// # define FORMAT_MSG "%8li %i %s for [%i]\n"
+// # define FORMAT_MSG "%8li %i %s for [%i]\n"
+// # define FORMAT_MSG "%8li %i %s for [%i]\n"
+// # define FORMAT_MSG "%8li %i %s for [%i]\n"
 # define FORK_MSG "\1\33[38;5;117mhas taken fork 1\2\1\33[0m\2\3"
 # define FORK2_MSG "\1\33[38;5;117mhas taken fork 2\2\1\33[0m\2\3"
 # define EATING_MSG "\1\33[38;5;198mis eating\2\1\33[0m\2\3"
@@ -155,6 +161,7 @@ int		init_deepthought(int ac, char **av, t_deep *thoughts);
 void	init_time(t_deep *thoughts);
 void	create_threads(t_deep *thoughts);
 void	join_threads(t_deep *thoughts);
+void	destroy_forks(t_deep *thoughts);
 
 
 // gods.c

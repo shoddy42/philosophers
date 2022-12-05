@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/12/02 06:09:09 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/02 13:29:04 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/05 11:29:54 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,14 +40,17 @@ static void	print_queue(t_deep *thoughts)
 
 	log = thoughts->log;
 	i = -1;
+
 	// printf ("log size?: %i\n", log->size);
 	while (++i < log->size)
 	{
-		printf(FORMAT_MSG, log->queue[i].time, log->queue[i].id, log->msgs[log->queue[i].type]);
+		// printf(FORMAT_MSG , log->queue[i].time / 1000, log->queue[i].id, log->msgs[log->queue[i].type]);
+		printf(FORMAT_MSG , log->queue[i].time, log->queue[i].id, log->msgs[log->queue[i].type]);
 		if (log->queue[i].type == DIE)
 		{
 			printf ("DEATH FOUND!\n");
 			log->size = -2000;
+			printf ("Last meal: [%li] diff: [%li]\n", thoughts->philosophers[log->queue[i].id].last_supper - thoughts->epoch, ((get_time() - thoughts->epoch)) - (thoughts->philosophers[log->queue[i].id].last_supper - thoughts->epoch));
 			break;		
 		}
 	}

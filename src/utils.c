@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 06:53:35 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/02 12:30:42 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/05 09:46:21 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,9 @@ long	get_time(void)
 
 	gettimeofday(&time, NULL);
 	//to get time in micro seconds
-	// return (time.tv_sec * 1000000 + time.tv_usec);
+	return (time.tv_sec * 1000000 + time.tv_usec);
 	//to get time in mili seconds
-	return (time.tv_sec * 1000 + time.tv_usec / 1000);
+	// return (time.tv_sec * 1000 + time.tv_usec / 1000);
 }
 
 /**

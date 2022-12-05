@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 09:12:20 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/02 13:22:20 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/05 11:25:13 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,6 @@ bool	confirm_reality(t_deep *thoughts)
 	bool	existance;
 
 	pthread_mutex_lock(&thoughts->sync);
-	// if (thoughts->oblivion == true)
-	// 	existance = false;
-	// else
-	// 	existance = true;
 	existance = (!thoughts->oblivion);
 	pthread_mutex_unlock(&thoughts->sync);
 	return (existance);
@@ -52,23 +48,54 @@ void	smart_sleep(long duration)
 	long	end_time;
 	long	cur_time;
 	long	dif_time;
+	long	mod_time;
 
 	end_time = get_time() + duration;
+	mod_time = end_time % 1000;
+	if (mod_time > 450)
+		mod_time = 450;
+	end_time -= mod_time;
+	// printf ("end [%li] start[%li] diff[%li] changed[%li]\n", end_time / 1000, get_time() / 1000, (end_time) - (get_time()), mod_time);
 	while (true)
 	{
 		cur_time = get_time();
 		if (cur_time >= end_time)
 			return ;
 		dif_time = end_time - cur_time;
-		if (dif_time <= 1)
+		if (dif_time <= 10000)
 		{
 			while (get_time() < end_time)
 				usleep(200);
 			return ;
 		}
-		usleep((dif_time * 2 * 1000) / 3);
+		// usleep((dif_time * 2) / 3);
+		usleep(dif_time / 2);
 	}
+	
 }
+
+// void	smart_sleep_ms(long duration)
+// {
+// 	long	end_time;
+// 	long	cur_time;
+// 	long	dif_time;
+
+// 	end_time = get_time() + duration;
+// 	while (true)
+// 	{
+// 		cur_time = get_time();
+// 		if (cur_time >= end_time)
+// 			return ;
+// 		dif_time = end_time - cur_time;
+// 		if (dif_time <= 1)
+// 		{
+// 			while (get_time() < end_time)
+// 				usleep(200);
+// 			return ;
+// 		}
+// 		usleep((dif_time * 2 * 1000) / 3);
+// 	}
+// }
 
 static void	get_forks(t_phil *philo, t_deep *thoughts)
 {
@@ -90,34 +117,31 @@ static void	get_forks(t_phil *philo, t_deep *thoughts)
 		pthread_mutex_lock(philo->right);
 		add_queue(get_time() - thoughts->epoch, FORK2, philo->id, thoughts);	
 	}
-	
 }
 
+		// printf ("%li [%i] picked up fork2\n", (get_time() - thoughts->epoch), philo->id);
+	// printf ("%li [%i] picked up fork2\n", (get_time() - thoughts->epoch), philo->id);
+	// printf ("%li [%i] is eating\n", (get_time() - thoughts->epoch), philo->id);
+		// printf ("%li [%i] is thinking\n", (get_time() - thoughts->epoch), philo->id);
+	// ponder_death(philo, philo->thoughts, philo->thoughts->variables[TT_EAT]);
 static void	consume(t_phil *philo)
 {
 	t_deep	*thoughts;
 
 	thoughts = philo->thoughts;
-	// gather forks.
 	// get_forks(philo, thoughts);
-	pthread_mutex_lock(philo->left);
-	// printf ("%li [%i] picked up fork2\n", (get_time() - thoughts->epoch), philo->id);
-	add_queue(get_time() - thoughts->epoch, FORK, philo->id, thoughts);
+
 	pthread_mutex_lock(philo->right);
-		// printf ("%li [%i] picked up fork2\n", (get_time() - thoughts->epoch), philo->id);
+	add_queue(get_time() - thoughts->epoch, FORK, philo->id, thoughts);
+	pthread_mutex_lock(philo->left);
 	add_queue(get_time() - thoughts->epoch, FORK2, philo->id, thoughts);
-	// update last meal and message.
 	pthread_mutex_lock(&philo->soul);
 	philo->last_supper = get_time();
 	pthread_mutex_unlock(&philo->soul);
-	// printf ("%li [%i] is eating\n", (get_time() - thoughts->epoch), philo->id);
 	add_queue(get_time() - thoughts->epoch, EAT, philo->id, thoughts);
-
-	// consume.
-	// ponder_death(philo, philo->thoughts, philo->thoughts->variables[TT_EAT]);
+	
 	smart_sleep(philo->thoughts->variables[TT_EAT]);
 
-	//update meals 
 	pthread_mutex_lock(&philo->soul);
 	philo->meals++;
 	pthread_mutex_unlock(&philo->soul);
@@ -133,24 +157,22 @@ void *yes(void *param)
 	bool	existance;
 
 	philo = param;
+
 	thoughts = philo->thoughts;
-	pthread_mutex_lock(&thoughts->sync);
 	existance = true;
+	pthread_mutex_lock(&thoughts->sync);
 	pthread_mutex_unlock(&thoughts->sync);
 	pthread_mutex_lock(&philo->soul);
 	philo->last_supper = thoughts->epoch;
 	pthread_mutex_unlock(&philo->soul);
 	if (philo->id % 2 == 0)
-		usleep(1);
+		usleep(5);
 	//todo: potentially only do one at a time so no extra messages!
 	while (existance)
 	{
-		// printf ("%li [%i] is thinking\n", (get_time() - thoughts->epoch), philo->id);
 		add_queue(get_time() - thoughts->epoch, THINK, philo->id, thoughts);
 		consume(philo);
-		// printf ("%li [%i] is sleeping\n", (get_time() - thoughts->epoch), philo->id);
 		add_queue(get_time() - thoughts->epoch, SLEEP, philo->id, thoughts);
-
 		smart_sleep(philo->thoughts->variables[TT_SLEEP]);
 		// ponder_death(philo, philo->thoughts, philo->thoughts->variables[TT_SLEEP]);
 		existance = confirm_reality(thoughts);
@@ -173,14 +195,17 @@ int main(int ac, char **av)
 	pthread_mutex_init(&thoughts->sync, NULL);
 	// usleep (1);
 	pthread_mutex_lock(&thoughts->sync);
-	// usleep (1);
+	printf ("Initialising simulation\n");
 	create_threads(thoughts);
 	ponder_death(NULL, thoughts, 5);
+	// while (get_time() % 1000 > 10)
+	// 	usleep(1);
 	thoughts->epoch = get_time();
 	pthread_mutex_unlock(&thoughts->sync);
 	watch_threads(thoughts);
 	// usleep (1);
 	join_threads(thoughts);
+	// destroy_forks(thoughts);
 	printf ("final time?: [%li]\n", (get_time() - thoughts->epoch));
 	return (0);
 }
