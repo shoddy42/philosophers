@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 08:27:04 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/05 09:31:42 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/06 10:28:52 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,4 +175,14 @@ int		init_deepthought(int ac, char **av, t_deep *thoughts)
 
 	init_philo(thoughts);
 	return (0);
+}
+
+void	init_philosophers(int ac, char **av, t_deep *thoughts)
+{
+	init_deepthought(ac, av, thoughts); //todo: setup failstate
+	init_log(thoughts);
+	pthread_mutex_init(&thoughts->sync, NULL);
+	// usleep (1);
+	pthread_mutex_lock(&thoughts->sync);
+	printf ("Initialising simulation\n");	
 }

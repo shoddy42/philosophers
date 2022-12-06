@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 09:12:24 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/05 10:33:42 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/06 10:51:42 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,12 +29,7 @@
 # define DEFAULT_NB_MEALS 8
 
 # define FORMAT_MSG "%8li %i %s\n"
-// # define FORMAT_MSG "%8li %i %s for [%i]\n"
-// # define FORMAT_MSG "%8li %i %s for [%i]\n"
-// # define FORMAT_MSG "%8li %i %s for [%i]\n"
-// # define FORMAT_MSG "%8li %i %s for [%i]\n"
-// # define FORMAT_MSG "%8li %i %s for [%i]\n"
-// # define FORMAT_MSG "%8li %i %s for [%i]\n"
+
 # define FORK_MSG "\1\33[38;5;117mhas taken fork 1\2\1\33[0m\2\3"
 # define FORK2_MSG "\1\33[38;5;117mhas taken fork 2\2\1\33[0m\2\3"
 # define EATING_MSG "\1\33[38;5;198mis eating\2\1\33[0m\2\3"
@@ -44,6 +39,15 @@
 # define DEATH_MSG "\1\33[38;5;196mhas died\2\3"
 
 
+/*
+	TIME COST PER INSTRUCTION.
+
+	WHILE LOOP OF 1000;		1
+
+	1000x LOCK && UNLOCK;	[26 - 55] 27/40 on average.
+	1000x printf; 			[800] - [1400]	
+
+*/
 
 // end of cursed zone
 typedef struct s_deepthought	t_deep;
@@ -112,6 +116,8 @@ typedef struct s_philosopher
 	t_mutex		soul;
 	
 	long		last_supper;
+	long		goal_time;
+	long		lost_time;
 	int			meals;
 	int			id;
 	t_deep		*thoughts;
@@ -145,7 +151,6 @@ typedef struct s_deepthought
 }	t_deep;
 
 // philosophers.c
-long	get_time(void);
 void 	*yes(void *param);
 bool	confirm_reality(t_deep *thoughts);
 void	end_universe(t_deep *thoughts);
@@ -155,6 +160,8 @@ bool	confirm_reality(t_deep *thoughts);
 // utils.c
 void	*ft_calloc(size_t count, size_t size);
 int		ft_atoi(const char *nb);
+void	get_forks(t_phil *philo, t_deep *thoughts);
+long	get_time(void);
 
 // init.c
 int		init_deepthought(int ac, char **av, t_deep *thoughts);
@@ -162,6 +169,7 @@ void	init_time(t_deep *thoughts);
 void	create_threads(t_deep *thoughts);
 void	join_threads(t_deep *thoughts);
 void	destroy_forks(t_deep *thoughts);
+void	init_philosophers(int ac, char **av, t_deep *thoughts);
 
 
 // gods.c
@@ -171,6 +179,9 @@ void	*watch_threads(t_deep *thoughts);
 void	*shakespeare(void *param);
 void	add_queue(long time, t_msg_type type, int id, t_deep *thoughts);
 
+
+// sleep.c
+void	smart_sleep(long duration);
 
 // REMOVE FILES
 void	init_log(t_deep *thoughts);

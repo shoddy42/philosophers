@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/12/02 06:09:09 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/05 11:29:54 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/06 09:41:13 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,6 @@ void	*shakespeare(void *param)
 	thoughts = param;
 	log = thoughts->log;
 	existance = true;
-	// printf ("log?: %s", log->msgs[log->queue[0].type]);
 	while (existance)
 	{
 		existance = confirm_reality(thoughts);
@@ -77,7 +76,5 @@ void	*shakespeare(void *param)
 			existance = true;
 		pthread_mutex_unlock(&thoughts->writers_block);
 	}
-
-
 	return (NULL);
 }

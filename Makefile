@@ -6,7 +6,7 @@
 #    By: wkonings <wkonings@student.codam.nl>         +#+                      #
 #                                                    +#+                       #
 #    Created: 2019/10/29 16:21:56 by wkonings      #+#    #+#                  #
-#    Updated: 2022/12/02 12:55:10 by wkonings      ########   odam.nl          #
+#    Updated: 2022/12/06 10:29:19 by wkonings      ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -36,7 +36,7 @@ INC			:= -I include
 HEADER_FILES:= $(INCLUDE_DIR)/philosophers.h
 HEADERS		:=	$(addprefix $(INCLUDE_DIR)/, $(HEADER_FILES))
 
-FILES		:=	philosophers gods poet utils init
+FILES		:=	philosophers gods poet utils init sleep
 
 SRCS		:=	$(addprefix $(SRC_DIR)/,$(FILES:%=%.c))
 OBJS		:=	$(addprefix $(OBJ_DIR)/,$(notdir $(SRCS:%.c=%.o)))

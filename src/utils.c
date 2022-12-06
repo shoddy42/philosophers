@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 06:53:35 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/05 09:46:21 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/06 10:42:55 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,4 +72,26 @@ int	ft_atoi(const char *nb)
 		i++;
 	}
 	return ((int)(r * sign));
+}
+
+void	get_forks(t_phil *philo, t_deep *thoughts)
+{
+	if (philo->id % 2)
+	{
+		pthread_mutex_lock(philo->left);
+		add_queue(get_time() - thoughts->epoch, FORK, philo->id, thoughts);
+		// printf ("%li [%i] picked up fork2\n", (get_time() - thoughts->epoch) / 1000, philo->id);
+
+		pthread_mutex_lock(philo->right);
+		add_queue(get_time() - thoughts->epoch, FORK2, philo->id, thoughts);
+	}
+	else
+	{
+		pthread_mutex_lock(philo->left);
+		add_queue(get_time() - thoughts->epoch, FORK, philo->id, thoughts);
+		// printf ("%li [%i] picked up fork2\n", (get_time() - thoughts->epoch) / 1000, philo->id);
+
+		pthread_mutex_lock(philo->right);
+		add_queue(get_time() - thoughts->epoch, FORK2, philo->id, thoughts);	
+	}
 }
