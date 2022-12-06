@@ -6,7 +6,7 @@
 #    By: wkonings <wkonings@student.codam.nl>         +#+                      #
 #                                                    +#+                       #
 #    Created: 2019/10/29 16:21:56 by wkonings      #+#    #+#                  #
-#    Updated: 2022/12/06 10:29:19 by wkonings      ########   odam.nl          #
+#    Updated: 2022/12/06 15:23:28 by wkonings      ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,7 @@
 
 #todo: FLAGS
 NAME = philo
-FLAGS = -pthread -g #-Wall -Wextra -Werror
+FLAGS = -Wall -Wextra -Werror -pthread
 DEBUG = -g -fsanitize=thread
 CC = gcc
 
@@ -41,11 +41,13 @@ FILES		:=	philosophers gods poet utils init sleep
 SRCS		:=	$(addprefix $(SRC_DIR)/,$(FILES:%=%.c))
 OBJS		:=	$(addprefix $(OBJ_DIR)/,$(notdir $(SRCS:%.c=%.o)))
 
+MAKEFILE	:= makefile
+
 # -----------------------------------------#
 # --------------- RECIPES -----------------#
 # -----------------------------------------#
 
-$(NAME): $(OBJS) $(HEADER_FILES)
+$(NAME): $(OBJS) $(HEADER_FILES) $(MAKEFILE)
 	gcc $(FLAGS) $(SRCS) -o $(NAME) $(INC) $(INCLUDES)
 
 debug: $(OBJS) $(HEADER_FILES)

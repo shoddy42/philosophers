@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 08:27:04 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/06 10:28:52 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/06 15:20:33 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,10 +78,10 @@ int		init_philo(t_deep *thoughts)
 		if (i > 0)
 			thoughts->philosophers[i].left = thoughts->philosophers[i - 1].right;
 	}
-	printf ("i = %i\n", i);
+	// printf ("i = %i\n", i);
 	if (i > 1)
 	{
-		printf ("SET LEFT!\n");
+		// printf ("SET LEFT!\n");
 		thoughts->philosophers[0].left = thoughts->philosophers[i - 1].right;
 	}
 	else
@@ -115,6 +115,8 @@ bool	legal_input(int ac, char **av)
 	int	x;
 
 	i = 0;
+	if (ac < 4)
+		return (false);
 	while (av[++i])
 	{
 		x = -1;
@@ -138,12 +140,12 @@ int		init_deepthought(int ac, char **av, t_deep *thoughts)
 	if (ac >= 5)
 	{
 		thoughts->variables[NB_PHILOS] = ft_atoi(av[NB_PHILOS + 1]);
-		thoughts->variables[TT_DIE]    = 1000 * ft_atoi(av[TT_DIE + 1]);
-		thoughts->variables[TT_EAT]    = 1000 * ft_atoi(av[TT_EAT + 1]);
-		thoughts->variables[TT_SLEEP]  = 1000 * ft_atoi(av[TT_SLEEP + 1]);
-			// thoughts->variables[TT_DIE]    = ft_atoi(av[TT_DIE + 1]);
-			// thoughts->variables[TT_EAT]    = ft_atoi(av[TT_EAT + 1]);
-			// thoughts->variables[TT_SLEEP]  = ft_atoi(av[TT_SLEEP + 1]);
+		// thoughts->variables[TT_DIE]    = 1000 * ft_atoi(av[TT_DIE + 1]);
+		// thoughts->variables[TT_EAT]    = 1000 * ft_atoi(av[TT_EAT + 1]);
+		// thoughts->variables[TT_SLEEP]  = 1000 * ft_atoi(av[TT_SLEEP + 1]);
+			thoughts->variables[TT_DIE]    = ft_atoi(av[TT_DIE + 1]);
+			thoughts->variables[TT_EAT]    = ft_atoi(av[TT_EAT + 1]);
+			thoughts->variables[TT_SLEEP]  = ft_atoi(av[TT_SLEEP + 1]);
 		thoughts->variables[NB_MEALS]  = 1;
 		if (ac == 6)
 			thoughts->variables[NB_MEALS]  = ft_atoi(av[NB_MEALS + 1]);
@@ -184,5 +186,5 @@ void	init_philosophers(int ac, char **av, t_deep *thoughts)
 	pthread_mutex_init(&thoughts->sync, NULL);
 	// usleep (1);
 	pthread_mutex_lock(&thoughts->sync);
-	printf ("Initialising simulation\n");	
+	// printf ("Initialising simulation\n");	
 }

@@ -6,21 +6,21 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 06:53:35 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/06 10:42:55 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/06 15:26:02 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/philosophers.h"
 
-long	get_time(void)
+unsigned long	get_time(void)
 {
 	struct timeval	time;
 
 	gettimeofday(&time, NULL);
 	//to get time in micro seconds
-	return (time.tv_sec * 1000000 + time.tv_usec);
+	// return (time.tv_sec * 1000000 + time.tv_usec);
 	//to get time in mili seconds
-	// return (time.tv_sec * 1000 + time.tv_usec / 1000);
+	return (time.tv_sec * 1000 + time.tv_usec / 1000);
 }
 
 /**

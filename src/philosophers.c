@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 09:12:20 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/06 10:53:55 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/06 15:52:51 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,12 +40,12 @@ static void	consume(t_phil *philo)
 	add_queue(get_time() - thoughts->epoch, FORK2, philo->id, thoughts);
 	pthread_mutex_lock(&philo->soul);
 	philo->last_supper = get_time();
-	philo->goal_time = philo->last_supper + thoughts->variables[TT_EAT] + thoughts->variables[TT_SLEEP];
+	add_queue(get_time() - thoughts->epoch, EAT, philo->id, thoughts);
+	// philo->goal_time = philo->last_supper + thoughts->variables[TT_EAT] + thoughts->variables[TT_SLEEP];
 	// printf ("Time diff [%li]\n", philo->goal_time - philo->last_supper);
 	pthread_mutex_unlock(&philo->soul);
-	add_queue(get_time() - thoughts->epoch, EAT, philo->id, thoughts);
 	
-	smart_sleep(philo->thoughts->variables[TT_EAT] - (philo->lost_time / 2));
+	smart_sleep(philo->thoughts->variables[TT_EAT]);
 
 	pthread_mutex_lock(&philo->soul);
 	philo->meals++;
@@ -59,51 +59,38 @@ void *yes(void *param)
 {
 	t_phil	*philo;
 	t_deep	*thoughts;
+	t_state state;
 	bool	existance;
 
 	philo = param;
 
 	thoughts = philo->thoughts;
 	existance = true;
+	state = THINKING;
 	pthread_mutex_lock(&thoughts->sync);
 	pthread_mutex_unlock(&thoughts->sync);
-	pthread_mutex_lock(&philo->soul);
+	// pthread_mutex_lock(&philo->soul);
 	philo->last_supper = thoughts->epoch;
-	pthread_mutex_unlock(&philo->soul);
+	// pthread_mutex_unlock(&philo->soul);
 	if (philo->id % 2 == 0)
-		usleep(5);
+		usleep(200);
 	//todo: potentially only do one at a time so no extra messages!
 	while (existance)
 	{
-		add_queue(get_time() - thoughts->epoch, THINK, philo->id, thoughts);
-		consume(philo);
-		add_queue(get_time() - thoughts->epoch, SLEEP, philo->id, thoughts);
-		smart_sleep(philo->thoughts->variables[TT_SLEEP] - (philo->lost_time / 2));
-		// ponder_death(philo, philo->thoughts, philo->thoughts->variables[TT_SLEEP]);
+		if (state == THINKING)
+			add_queue(get_time() - thoughts->epoch, THINK, philo->id, thoughts);
+		else if (state == EATING)
+			consume(philo);
+		else if (state == SLEEPING)
+		{
+			add_queue(get_time() - thoughts->epoch, SLEEP, philo->id, thoughts);
+			smart_sleep(philo->thoughts->variables[TT_SLEEP]);
+		}
+		state = (state + 1) % 3;
 		existance = confirm_reality(thoughts);
-		pthread_mutex_lock(&philo->soul);
-		philo->lost_time = get_time() - philo->goal_time;
-		pthread_mutex_unlock(&philo->soul);
-		// printf ("LOST TIME: [%li]\n", get_time() - philo->goal_time);
 	}
 	// printf ("THREAD %i EXITED\n", philo->id);
 	return(NULL);
-}
-
-int	test(t_deep *thoughts)
-{
-	int i;
-	i = -1;
-	thoughts->epoch = get_time();
-	while (++i < 1000)
-	{
-		// pthread_mutex_lock(thoughts->philosophers[0].right);
-		// pthread_mutex_unlock(thoughts->philosophers[0].right);
-		printf ("time[%i] = [%li]\n", i, get_time() - thoughts->epoch);
-		// printf ("testtesttesttest\n");
-	}
-	printf ("time[%i] = [%li]\n", i, get_time() - thoughts->epoch);
-	return (0);
 }
 
 int main(int ac, char **av)
@@ -115,18 +102,14 @@ int main(int ac, char **av)
 		exit (EXIT_FAILURE);
 
 	init_philosophers(ac, av, thoughts);
-	// return (test(thoughts)); //for testing timeloss in function calls.
-	
 	create_threads(thoughts);
-	ponder_death(NULL, thoughts, 5);
-	while (get_time() % 1000 > 10)
-		usleep(1);
 	thoughts->epoch = get_time();
 	pthread_mutex_unlock(&thoughts->sync);
 	watch_threads(thoughts);
+	// test(thoughts); //for testing timeloss in function calls.
 	// usleep (1);
 	join_threads(thoughts);
 	destroy_forks(thoughts);
-	printf ("final time?: [%li]\n", (get_time() - thoughts->epoch));
+	// printf ("final time?: [%li]\n", (get_time() - thoughts->epoch));
 	return (0);
 }

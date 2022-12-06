@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 09:12:24 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/06 10:51:42 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/06 15:25:38 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,13 +30,20 @@
 
 # define FORMAT_MSG "%8li %i %s\n"
 
-# define FORK_MSG "\1\33[38;5;117mhas taken fork 1\2\1\33[0m\2\3"
-# define FORK2_MSG "\1\33[38;5;117mhas taken fork 2\2\1\33[0m\2\3"
-# define EATING_MSG "\1\33[38;5;198mis eating\2\1\33[0m\2\3"
-# define SLEEPING_MSG "\1\33[38;5;135mis sleeping\2\1\33[0m\2\3"
-# define THINKING_MSG "\1\33[38;5;27mis thinking\2\1\33[0m\2\3"
-// # define DEATH_MSG "has died"
-# define DEATH_MSG "\1\33[38;5;196mhas died\2\3"
+// todo: remove fork2 msg
+// # define FORK_MSG "\1\33[38;5;117mhas taken fork 1\2\1\33[0m\2\3"
+// # define FORK2_MSG "\1\33[38;5;117mhas taken fork 2\2\1\33[0m\2\3"
+// # define EATING_MSG "\1\33[38;5;198mis eating\2\1\33[0m\2\3"
+// # define SLEEPING_MSG "\1\33[38;5;135mis sleeping\2\1\33[0m\2\3"
+// # define THINKING_MSG "\1\33[38;5;27mis thinking\2\1\33[0m\2\3"
+// # define DEATH_MSG "\1\33[38;5;196mhas died\2\3"
+
+# define FORK_MSG "has taken fork 1"
+# define FORK2_MSG "has taken fork 2"
+# define EATING_MSG "is eating"
+# define SLEEPING_MSG "is sleeping"
+# define THINKING_MSG "is thinking"
+# define DEATH_MSG "has died"
 
 
 /*
@@ -56,12 +63,12 @@ typedef pthread_mutex_t			t_mutex;
 /** 
  * @brief	Enumerators for clarity when accessing
  *
- * @param	NB_PHILOS The amount of philosophers in the simulation.
- * @param	TT_DIE	The time (in ms?) it takes for a philosopher to die.
- * @param	TT_EAT	The time (in ms?) it takes for a philosopher to eat.
- * @param	TT_SLEEP The time (in ms?) it takes for a philosopher to sleep.
- * @param	NB_MEALS The number of times the philosophers will eat
- * 					 before ending the simulation.
+ * @param	NB_PHILOS	The amount of philosophers in the simulation.
+ * @param	TT_DIE		The time (in ms?) it takes for a philosopher to die.
+ * @param	TT_EAT		The time (in ms?) it takes for a philosopher to eat.
+ * @param	TT_SLEEP 	The time (in ms?) it takes for a philosopher to sleep.
+ * @param	NB_MEALS 	The number of times the philosophers will eat
+ * 					 	before ending the simulation.
  */
 enum e_variables
 {
@@ -77,9 +84,6 @@ typedef enum e_state
 	EATING,
 	SLEEPING,
 	THINKING,
-	DEAD,
-	CHILLING,
-	THIEVING,
 }	t_state;
 
 typedef enum e_message_types
@@ -96,7 +100,7 @@ typedef enum e_message_types
 typedef struct s_message
 {
 	t_msg_type	type;
-	long		time;
+	unsigned long		time;
 	int			id;
 }	t_msg;
 
@@ -115,9 +119,9 @@ typedef struct s_philosopher
 	t_mutex		*right;
 	t_mutex		soul;
 	
-	long		last_supper;
-	long		goal_time;
-	long		lost_time;
+	unsigned long		last_supper;
+	unsigned long		goal_time;
+	unsigned long		lost_time;
 	int			meals;
 	int			id;
 	t_deep		*thoughts;
@@ -134,7 +138,7 @@ typedef struct s_deepthought
 {
 	int			variables[5];
 	t_phil		*philosophers;
-	long		epoch;
+	unsigned long		epoch;
 
 
 	pthread_t	shakespeare;
@@ -151,7 +155,7 @@ typedef struct s_deepthought
 }	t_deep;
 
 // philosophers.c
-void 	*yes(void *param);
+void	*yes(void *param);
 bool	confirm_reality(t_deep *thoughts);
 void	end_universe(t_deep *thoughts);
 bool	ponder_death(t_phil *philo, t_deep *thoughts, int time);
@@ -161,7 +165,7 @@ bool	confirm_reality(t_deep *thoughts);
 void	*ft_calloc(size_t count, size_t size);
 int		ft_atoi(const char *nb);
 void	get_forks(t_phil *philo, t_deep *thoughts);
-long	get_time(void);
+unsigned long	get_time(void);
 
 // init.c
 int		init_deepthought(int ac, char **av, t_deep *thoughts);
@@ -177,11 +181,11 @@ void	*watch_threads(t_deep *thoughts);
 
 // poet.c
 void	*shakespeare(void *param);
-void	add_queue(long time, t_msg_type type, int id, t_deep *thoughts);
+void	add_queue(unsigned long time, t_msg_type type, int id, t_deep *thoughts);
 
 
 // sleep.c
-void	smart_sleep(long duration);
+void	smart_sleep(unsigned long duration);
 
 // REMOVE FILES
 void	init_log(t_deep *thoughts);

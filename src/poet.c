@@ -6,13 +6,13 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/12/02 06:09:09 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/06 09:41:13 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/06 16:14:48 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/philosophers.h"
 
-void	add_queue(long time, t_msg_type type, int id, t_deep *thoughts)
+void	add_queue(unsigned long time, t_msg_type type, int id, t_deep *thoughts)
 {
 	t_log	*log;
 
@@ -20,7 +20,6 @@ void	add_queue(long time, t_msg_type type, int id, t_deep *thoughts)
 	pthread_mutex_lock(&thoughts->writers_block);
 	if (log->size < 0)
 	{
-		// printf ("LOG BLOCKED\n");
 		pthread_mutex_unlock(&thoughts->writers_block);
 		return ;
 	}
@@ -38,20 +37,16 @@ static void	print_queue(t_deep *thoughts)
 	t_log	*log;
 	int		i;
 
-	log = thoughts->log;
 	i = -1;
-
-	// printf ("log size?: %i\n", log->size);
+	log = thoughts->log;
 	while (++i < log->size)
 	{
-		// printf(FORMAT_MSG , log->queue[i].time / 1000, log->queue[i].id, log->msgs[log->queue[i].type]);
 		printf(FORMAT_MSG , log->queue[i].time, log->queue[i].id, log->msgs[log->queue[i].type]);
 		if (log->queue[i].type == DIE)
 		{
-			printf ("DEATH FOUND!\n");
 			log->size = -2000;
-			printf ("Last meal: [%li] diff: [%li]\n", thoughts->philosophers[log->queue[i].id].last_supper - thoughts->epoch, ((get_time() - thoughts->epoch)) - (thoughts->philosophers[log->queue[i].id].last_supper - thoughts->epoch));
-			break;		
+			// printf ("Last meal: [%li] diff: [%li]\n", thoughts->philosophers[log->queue[i].id].last_supper - thoughts->epoch, ((get_time() - thoughts->epoch)) - (thoughts->philosophers[log->queue[i].id].last_supper - thoughts->epoch));
+			return ;
 		}
 	}
 	log->size -= i;
@@ -69,7 +64,7 @@ void	*shakespeare(void *param)
 	while (existance)
 	{
 		existance = confirm_reality(thoughts);
-		usleep (200);
+		usleep (500);
 		pthread_mutex_lock(&thoughts->writers_block);
 		print_queue(thoughts);
 		if (log->size > 0)

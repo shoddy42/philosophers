@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/12/02 04:54:39 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/06 10:36:14 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/06 16:12:32 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,22 +21,24 @@ void	end_universe(t_deep *thoughts)
 
 bool	thanatos(t_phil *mortal, t_deep *thoughts)
 {
-	long	time;
+	unsigned long	time;
 
 	time = get_time();
-	if ((((time - thoughts->epoch) - (mortal->last_supper - thoughts->epoch))) / 1000 <= (long)thoughts->variables[TT_DIE] / 1000)
+	// if ((((time - thoughts->epoch) - (mortal->last_supper - thoughts->epoch))) / 1000 <= (unsigned long)thoughts->variables[TT_DIE] / 1000)
+	if (((time - thoughts->epoch) - (mortal->last_supper - thoughts->epoch)) <= (unsigned long)thoughts->variables[TT_DIE])
 	{
 		return (false);
 	}
+	printf("\1\33[38;5;196m%8lu %i DED\n", get_time() - thoughts->epoch, mortal->id);
 	add_queue(get_time() - thoughts->epoch, DIE, mortal->id, thoughts);
 	// printf ("%li %i dead. last? %li\n", (time - thoughts->epoch), mortal->id, mortal->last_supper - thoughts->epoch);
-	// printf ("%li <= %li\n", mortal->last_supper - thoughts->epoch, (long)thoughts->variables[TT_DIE]);
+	// printf ("%li <= %li\n", mortal->last_supper - thoughts->epoch, (unsigned long)thoughts->variables[TT_DIE]);
 	// printf ("?: %li\n", (time - thoughts->epoch) - (mortal->last_supper - thoughts->epoch));
 	// printf ("\1\33[38;5;182m %li %i dead. last? %li\n\2\3", (time - mortal->last_supper), mortal->id, mortal->last_supper - thoughts->epoch);
 	pthread_mutex_unlock(&mortal->soul);
 	// pthread_mutex_unlock()
 	end_universe(thoughts);
-	printf ("Hello!?\n");
+	// printf ("Hello!?\n");
 	return (true);
 }
 
@@ -60,15 +62,16 @@ bool	observe(t_deep *thoughts)
 	}
 	if (thoughts->satisfied < thoughts->variables[NB_PHILOS])
 		return (true);
-	printf ("ALL ARE SATISFIED! %i\n", thoughts->variables[NB_MEALS]);
+	// printf ("ALL ARE SATISFIED! %i\n", thoughts->variables[NB_MEALS]);
 	end_universe(thoughts);
 	return (false);
 }
 
 void	*watch_threads(t_deep *thoughts)
 {
-	ponder_death(NULL, thoughts, TT_DIE - 1);
+	// ponder_death(NULL, thoughts, TT_DIE - 1);
+	smart_sleep(thoughts->variables[TT_DIE] - 1);
 	while (observe(thoughts))
-		usleep (50);
+		usleep (200);
 	return (NULL);
 }
