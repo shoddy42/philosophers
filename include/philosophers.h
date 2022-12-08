@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 09:12:24 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/08 12:51:59 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/08 15:25:14 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,11 @@
 # include <unistd.h>
 # include <stdbool.h>
 # include <sys/time.h>
+# include <stdio.h>
+# include <limits.h>
 
 // cursed zone
-# include <fcntl.h> //later: remove
-# include <stdio.h> //later: remove
+// # include <fcntl.h> // DBG
 # define DEFAULT_NB_PHILOS 5
 # define DEFAULT_TT_DIE 1100
 # define DEFAULT_TT_EAT 580
@@ -45,24 +46,14 @@
 # define SLEEPING_MSG "is sleeping"
 # define THINKING_MSG "is thinking"
 # define DEATH_MSG "has died"
-
-
-/*
-	TIME COST PER INSTRUCTION.
-
-	WHILE LOOP OF 1000;		1
-
-	1000x LOCK && UNLOCK;	[26 - 55] 27/40 on average.
-	1000x printf; 			[800] - [1400]	
-
-*/
+# define END_MSG "Simulation succesful!"
 
 // end of cursed zone
 typedef struct s_deepthought	t_deep;
 typedef pthread_mutex_t			t_mutex;
 
 /** 
- * @brief	Enumerators for clarity when accessing
+ * @brief	Enumerators for clarity when accessing the simulations variables.
  *
  * @param	NB_PHILOS	The amount of philosophers in the simulation.
  * @param	TT_DIE		The time (in ms?) it takes for a philosopher to die.
@@ -121,7 +112,7 @@ typedef struct s_philosopher
 	t_mutex			*left;
 	t_mutex			*right;
 	t_mutex			soul;
-	
+
 	unsigned long	last_supper;
 	int				meals;
 	int				id;
@@ -137,22 +128,20 @@ typedef struct s_philosopher
  */
 typedef struct s_deepthought
 {
-	int			variables[5];
-	t_phil		*philosophers;
-	unsigned long		epoch;
+	long			variables[5];
+	t_phil			*philos;
+	unsigned long	epoch;
 
+	pthread_t		shakespeare;
+	t_mutex			writers_block;
+	t_log			*log;
 
-	pthread_t	shakespeare;
-	t_mutex		writers_block;
-	t_log		*log;
+	t_mutex			sync;
 
-	t_mutex		sync;
+	int				satisfied;
+	bool			oblivion;
 
-	int			satisfied;
-	bool		oblivion;
-
-	//debug zone
-	int	fd;
+	int				fd;
 }	t_deep;
 
 // philosophers.c
@@ -169,12 +158,13 @@ void	get_forks(t_phil *philo, t_deep *thoughts);
 unsigned long	get_time(void);
 
 // init.c
-int		init_deepthought(int ac, char **av, t_deep *thoughts);
-void	init_time(t_deep *thoughts);
-void	create_threads(t_deep *thoughts);
-void	join_threads(t_deep *thoughts);
-void	destroy_forks(t_deep *thoughts);
-void	init_philosophers(int ac, char **av, t_deep *thoughts);
+bool	init_deepthought(int ac, char **av, t_deep *thoughts);
+bool	init_time(t_deep *thoughts);
+bool	create_threads(t_deep *thoughts);
+bool	join_threads(t_deep *thoughts);
+bool	destroy_forks(t_deep *thoughts);
+bool	init_philosophers(int ac, char **av, t_deep *thoughts);
+bool	init_log(t_deep *thoughts);
 
 
 // gods.c
@@ -188,8 +178,9 @@ void	add_queue(unsigned long time, t_msg_type type, int id, t_deep *thoughts);
 // sleep.c
 void	smart_sleep(unsigned long duration);
 
-// REMOVE FILES
-void	init_log(t_deep *thoughts);
+// init_utils.c
+bool	init_error(char *error_msg);
+bool	legal_input(int ac, char **av);
 
 
 #endif

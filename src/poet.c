@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/12/02 06:09:09 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/08 12:55:51 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/08 15:03:16 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ static void	print_queue(t_deep *thoughts)
 		{
 			log->queue_size = -2000;
 			log->print_size = -2000;
-			printf ("Last meal: [%li] reported: [%li] diff: [%li]\n", thoughts->philosophers[log->queue[i].id].last_supper - thoughts->epoch, log->queue[i].time, ((get_time() - thoughts->epoch)) - (thoughts->philosophers[log->queue[i].id].last_supper - thoughts->epoch));
+			printf ("Last meal: [%li] reported: [%li] diff: [%li]\n", thoughts->philos[log->queue[i].id].last_supper - thoughts->epoch, log->queue[i].time, ((get_time() - thoughts->epoch)) - (thoughts->philos[log->queue[i].id].last_supper - thoughts->epoch));
 			return ;
 		}
 	}

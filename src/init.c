@@ -6,182 +6,104 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 08:27:04 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/08 13:21:57 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/08 15:29:38 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/philosophers.h"
 
-void	create_threads(t_deep *thoughts)
-{
-	int	i;
-	t_phil *philo;
-
-	philo = thoughts->philosophers;
-
-	i = -1;
-	while (++i < thoughts->variables[NB_PHILOS])
-	{
-		pthread_create(&philo[i].thread, NULL, yes, (void *)&philo[i]);
-	}
-	pthread_create(&thoughts->shakespeare, NULL, &shakespeare, thoughts);
-}
-
-void	join_threads(t_deep *thoughts)
-{
-	int	i;
-	t_phil *philo;
-
-	philo = thoughts->philosophers;
-
-	i = -1;
-	while (++i < thoughts->variables[NB_PHILOS])
-	{
-		pthread_join(philo[i].thread, NULL);		
-	}
-	pthread_join(thoughts->shakespeare, NULL);
-}
-
-void	destroy_forks(t_deep *thoughts)
-{
-	int	i;
-	t_phil *philo;
-
-	philo = thoughts->philosophers;
-
-	i = -1;
-	while (++i < thoughts->variables[NB_PHILOS])
-	{
-		pthread_mutex_destroy(thoughts->philosophers->right);	
-	}
-	// pthread_join(thoughts->shakespeare, NULL);
-}
-
-
 //todo: error handling
-int		init_philo(t_deep *thoughts)
+bool	init_philo(t_deep *thoughts, int i)
 {
-	int i;
-	thoughts->philosophers = ft_calloc(thoughts->variables[NB_PHILOS], sizeof(t_phil));
-	if (!thoughts->philosophers)
-		exit (-1);
+	t_phil	*philos;
+
+	philos = thoughts->philos;
 	thoughts->epoch = get_time();
-	i = -1;
 	while (++i < thoughts->variables[NB_PHILOS])
 	{
-		thoughts->philosophers[i].id = i + 1;
-		thoughts->philosophers[i].thoughts = thoughts;
-		thoughts->philosophers[i].right = ft_calloc(1, sizeof(t_mutex));
-		thoughts->philosophers[i].last_supper = thoughts->epoch;
-		pthread_mutex_init(thoughts->philosophers[i].right, NULL);
-		pthread_mutex_init(&thoughts->philosophers[i].soul, NULL);
+		philos[i].id = i + 1;
+		philos[i].thoughts = thoughts;
+		philos[i].right = ft_calloc(1, sizeof(t_mutex));
+		philos[i].last_supper = thoughts->epoch;
+		if (pthread_mutex_init(philos[i].right, NULL) != 0)
+			return (init_error("Failed to init right mutex"));
+		if (pthread_mutex_init(&philos[i].soul, NULL) != 0)
+			return (init_error("Failed to init philo's soul"));
 		if (i > 0)
-			thoughts->philosophers[i].left = thoughts->philosophers[i - 1].right;
+			philos[i].left = philos[i - 1].right;
 	}
 	if (i > 1)
-		thoughts->philosophers[0].left = thoughts->philosophers[i - 1].right;
+		philos[0].left = philos[i - 1].right;
 	else
-		thoughts->philosophers[0].left = NULL;
+		philos[0].left = NULL;
 	return (0);
 }
 
-//later: remove
-void	init_log(t_deep *thoughts)
+// DBG
+// thoughts->fd = open("philosophers.log\n", O_CREAT | O_TRUNC | O_RDWR, 0644);
+// dup2(thoughts->fd, STDOUT_FILENO);
+bool	init_log(t_deep *thoughts)
 {
-	thoughts->fd = open("philosophers.log\n", O_CREAT | O_TRUNC | O_RDWR, 0644);
-	dup2(thoughts->fd, STDOUT_FILENO);
+	t_log	*log;
+
 	thoughts->log = ft_calloc(1, sizeof(t_log));
-	// thoughts->log->max = 1000;
-	thoughts->log->max = thoughts->variables[NB_PHILOS] * 100;
-	pthread_mutex_init(&thoughts->writers_block, NULL);
-	thoughts->log->msgs[FORK] = FORK_MSG;
-	thoughts->log->msgs[FORK2] = FORK2_MSG;
-	thoughts->log->msgs[EAT] = EATING_MSG;
-	thoughts->log->msgs[SLEEP] = SLEEPING_MSG;
-	thoughts->log->msgs[THINK] = THINKING_MSG;
-	thoughts->log->msgs[DIE] = DEATH_MSG;
-	// thoughts->log->msgs[END] = FORK_MSG;
-	//todo: experiment with logsize
-	thoughts->log->queue = ft_calloc(thoughts->variables[NB_PHILOS] * 100, sizeof(t_msg));
-	thoughts->log->print = ft_calloc(thoughts->variables[NB_PHILOS] * 100, sizeof(t_msg));
-}
-
-bool	legal_input(int ac, char **av)
-{
-	int	i;
-	int	x;
-
-	i = 0;
-	if (ac < 4)
-		return (false);
-	while (av[++i])
-	{
-		x = -1;
-		while (av[i][++x])
-		{
-			if ((av[i][x] < '0' || av[i][x] > '9'))
-				return (false);
-		}
-	}
-	return (true);
-}
-
-int		init_deepthought(int ac, char **av, t_deep *thoughts)
-{
-	if (!legal_input(ac, av))
-	{
-		printf ("Bad arguments\n");
-		exit (0);
-		
-	}
-	if (ac >= 5)
-	{
-		thoughts->variables[NB_PHILOS] = ft_atoi(av[NB_PHILOS + 1]);
-		// thoughts->variables[TT_DIE]    = 1000 * ft_atoi(av[TT_DIE + 1]);
-		// thoughts->variables[TT_EAT]    = 1000 * ft_atoi(av[TT_EAT + 1]);
-		// thoughts->variables[TT_SLEEP]  = 1000 * ft_atoi(av[TT_SLEEP + 1]);
-			thoughts->variables[TT_DIE]    = ft_atoi(av[TT_DIE + 1]);
-			thoughts->variables[TT_EAT]    = ft_atoi(av[TT_EAT + 1]);
-			thoughts->variables[TT_SLEEP]  = ft_atoi(av[TT_SLEEP + 1]);
-		thoughts->variables[NB_MEALS]  = 1;
-		if (ac == 6)
-			thoughts->variables[NB_MEALS]  = ft_atoi(av[NB_MEALS + 1]);
-		else
-			thoughts->variables[NB_MEALS] = -1;
-		if (ac > 6)
-			printf ("too many args bruh\n");
-	}
-	// else
-	// {
-	// 	thoughts->variables[NB_PHILOS] = DEFAULT_NB_PHILOS;
-	// 	thoughts->variables[TT_DIE]    = DEFAULT_TT_DIE;
-	// 	thoughts->variables[TT_EAT]    = DEFAULT_TT_EAT;
-	// 	thoughts->variables[TT_SLEEP]  = DEFAULT_TT_SLEEP;
-	// 	thoughts->variables[NB_MEALS]  = DEFAULT_NB_MEALS;
-	// }
-	if (thoughts->variables[NB_PHILOS] < 0 || thoughts->variables[TT_DIE] < 0 || thoughts->variables[TT_EAT] < 0 || 
-		thoughts->variables[TT_SLEEP] < 0)
-	{
-		printf ("bad input\n");
-		exit (0);
-	}
-
-	// 	printf ("philos count  = [%i]\n", thoughts->variables[NB_PHILOS]);
-	// 	printf ("time to die   = [%i]\n", thoughts->variables[TT_DIE]);
-	// 	printf ("time to eat   = [%i]\n", thoughts->variables[TT_EAT]);
-	// 	printf ("time to sleep = [%i]\n", thoughts->variables[TT_SLEEP]);
-	// 	printf ("meals count   = [%i]\n", thoughts->variables[NB_MEALS]);
-
-	init_philo(thoughts);
+	if (!thoughts->log)
+		return (init_error("Failed to allocate for log"));
+	log = thoughts->log;
+	log->queue = ft_calloc(thoughts->variables[NB_PHILOS] * 100, sizeof(t_msg));
+	log->print = ft_calloc(thoughts->variables[NB_PHILOS] * 100, sizeof(t_msg));
+	if (!log->queue || !log->print)
+		return (init_error("Failed to allocate for log's queue"));
+	log->max = thoughts->variables[NB_PHILOS] * 100;
+	if (pthread_mutex_init(&thoughts->writers_block, NULL) != 0)
+		return (init_error("Failed to init log's mutex"));
+	log->msgs[FORK] = FORK_MSG;
+	log->msgs[FORK2] = FORK2_MSG;
+	log->msgs[EAT] = EATING_MSG;
+	log->msgs[SLEEP] = SLEEPING_MSG;
+	log->msgs[THINK] = THINKING_MSG;
+	log->msgs[DIE] = DEATH_MSG;
+	log->msgs[END] = END_MSG;
 	return (0);
 }
 
-void	init_philosophers(int ac, char **av, t_deep *thoughts)
+bool	init_deepthought(int ac, char **av, t_deep *thoughts)
 {
-	init_deepthought(ac, av, thoughts); //todo: setup failstate
-	init_log(thoughts);
-	pthread_mutex_init(&thoughts->sync, NULL);
-	// usleep (1);
+	long	*vars;
+
+	if (legal_input(ac, av) != 0)
+		return (1);
+	vars = thoughts->variables;
+	vars[NB_PHILOS] = ft_atoi(av[NB_PHILOS + 1]);
+	vars[TT_DIE] = ft_atoi(av[TT_DIE + 1]);
+	vars[TT_EAT] = ft_atoi(av[TT_EAT + 1]);
+	vars[TT_SLEEP] = ft_atoi(av[TT_SLEEP + 1]);
+	vars[NB_MEALS] = -1;
+	if (ac == 6)
+		vars[NB_MEALS] = ft_atoi(av[NB_MEALS + 1]);
+	if (vars[NB_PHILOS] <= 0 || vars[TT_DIE] <= 0 \
+		|| vars[TT_EAT] <= 0 || vars[TT_SLEEP] <= 0)
+		return (init_error("Only arguments above 0 allowed!"));
+	if (vars[NB_PHILOS] > INT_MAX || vars[TT_DIE] > INT_MAX \
+		|| vars[TT_EAT] > INT_MAX || vars[TT_SLEEP] > INT_MAX)
+		return (init_error("Only arguments under INT_MAX"));
+	return (0);
+}
+
+bool	init_philosophers(int ac, char **av, t_deep *thoughts)
+{
+	if (init_deepthought(ac, av, thoughts) != 0)
+		return (EXIT_FAILURE);
+	thoughts->philos = ft_calloc(thoughts->variables[NB_PHILOS], \
+		sizeof(t_phil));
+	if (!thoughts->philos)
+		return (init_error("Failed to allocate for philosophers."));
+	if (init_philo(thoughts, -1) != 0)
+		return (EXIT_FAILURE);
+	if (init_log(thoughts) != 0)
+		return (EXIT_FAILURE);
+	if (pthread_mutex_init(&thoughts->sync, NULL) != 0)
+		return (init_error("Failed to initialise sync mutex"));
 	pthread_mutex_lock(&thoughts->sync);
-	// printf ("Initialising simulation\n");	
+	return (0);
 }

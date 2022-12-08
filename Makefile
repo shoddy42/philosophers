@@ -6,7 +6,7 @@
 #    By: wkonings <wkonings@student.codam.nl>         +#+                      #
 #                                                    +#+                       #
 #    Created: 2019/10/29 16:21:56 by wkonings      #+#    #+#                  #
-#    Updated: 2022/12/08 12:08:34 by wkonings      ########   odam.nl          #
+#    Updated: 2022/12/08 14:53:11 by wkonings      ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -36,7 +36,7 @@ INC			:= -I include
 HEADER_FILES:= $(INCLUDE_DIR)/philosophers.h
 HEADERS		:=	$(addprefix $(INCLUDE_DIR)/, $(HEADER_FILES))
 
-FILES		:=	philosophers gods poet utils init sleep
+FILES		:=	philosophers gods poet utils init init_utils sleep
 
 SRCS		:=	$(addprefix $(SRC_DIR)/,$(FILES:%=%.c))
 OBJS		:=	$(addprefix $(OBJ_DIR)/,$(notdir $(SRCS:%.c=%.o)))
@@ -48,10 +48,14 @@ MAKEFILE	:= makefile
 # -----------------------------------------#
 
 $(NAME): $(OBJS) $(HEADER_FILES) $(MAKEFILE)
-	gcc $(FLAGS) $(SRCS) -o $(NAME) $(INC) $(INCLUDES)
+	$(CC) $(FLAGS) $(SRCS) -o $(NAME) $(INC) $(INCLUDES)
 
-debug: $(OBJS) $(HEADER_FILES)
-	gcc $(DEBUG) $(SRCS) -o $(NAME) $(INC) $(INCLUDES)
+debug: $(OBJS) $(HEADER_FILES) $(MAKEFILE)
+	$(CC) $(DEBUG) $(SRCS) -o $(NAME) $(INC) $(INCLUDES)
+
+
+fancy: $(OBJS) $(HEADER_FILES) $(MAKEFILE)
+	$(CC) $(FLAGS) $(SRCS) -o $(NAME) $(INC) $(INCLUDES)
 
 echo:
 	@echo $(SOURCES)
