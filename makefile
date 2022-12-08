@@ -6,7 +6,7 @@
 #    By: wkonings <wkonings@student.codam.nl>         +#+                      #
 #                                                    +#+                       #
 #    Created: 2019/10/29 16:21:56 by wkonings      #+#    #+#                  #
-#    Updated: 2022/12/08 17:51:44 by wkonings      ########   odam.nl          #
+#    Updated: 2022/12/08 18:16:27 by wkonings      ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,7 +18,7 @@
 #todo: FLAGS
 NAME = philo
 FLAGS = -Wall -Wextra -Werror -pthread
-DEBUG = -g -fsanitize=address
+DEBUG = -g -fsanitize=thread
 CC = gcc
 
 # --------------- DIRECTORIES ------------ #
@@ -53,19 +53,20 @@ $(NAME): $(OBJS) $(HEADERS) $(MAKEFILE)
 debug: $(OBJS) $(HEADERS) $(MAKEFILE)
 	$(CC) $(DEBUG) $(SRCS) -o $(NAME) $(INC) $(INCLUDES)
 
-
 fancy: $(OBJS) $(HEADERS) $(MAKEFILE)
 	$(CC) $(FLAGS) -D FANCY=1 $(SRCS) -o $(NAME) $(INC) $(INCLUDES)
+
+normal: $(OBJS) $(HEADERS) $(MAKEFILE)
+	$(CC) $(FLAGS) $(SRCS) -o $(NAME) $(INC) $(INCLUDES)
 
 all: $(NAME)
 
 $(OBJ_DIR):
 	@mkdir -p $@
 
-#add flags back into the CC
 $(OBJ_DIR)/%.o:$(SRC_DIR)/%.c | $(OBJ_DIR)
 	@echo Creating file.
-	$(CC) $(INC) $(INCLUDE_READLINE) -c $< -o $@
+	$(CC) $(FLAGS) $(INC) $(INCLUDE_READLINE) -c $< -o $@
 
 flags:
 	gcc $(FLAGS) $(SOURCES) -lft $(INCLUDES)

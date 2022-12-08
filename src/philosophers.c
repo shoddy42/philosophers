@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 09:12:20 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/08 17:56:17 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/08 18:35:21 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ void	*life(void *param)
 	{
 		if (state == THINKING)
 			add_queue(get_time() - thoughts->epoch, THINK, philo->id, thoughts);
-		else if (state == EATING)
+		if (state == EATING)
 			consume(philo);
 		else if (state == SLEEPING)
 		{
