@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/12/02 06:09:09 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/06 16:14:48 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/08 12:55:51 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,20 +18,21 @@ void	add_queue(unsigned long time, t_msg_type type, int id, t_deep *thoughts)
 
 	log = thoughts->log;
 	pthread_mutex_lock(&thoughts->writers_block);
-	if (log->size < 0)
+	if (log->queue_size < 0)
 	{
 		pthread_mutex_unlock(&thoughts->writers_block);
 		return ;
 	}
-	log->queue[log->size].type = type;
-	log->queue[log->size].time = time;
-	log->queue[log->size].id = id;
-	log->size++;
-	if (log->size > log->max)
+	log->queue[log->queue_size].type = type;
+	log->queue[log->queue_size].time = time;
+	log->queue[log->queue_size].id = id;
+	log->queue_size++;
+	if (log->queue_size > log->max)
 		printf("LOG SOMEHOW FULL!!!\n");
 	pthread_mutex_unlock(&thoughts->writers_block);
 }
 
+//change to print
 static void	print_queue(t_deep *thoughts)
 {
 	t_log	*log;
@@ -39,17 +40,33 @@ static void	print_queue(t_deep *thoughts)
 
 	i = -1;
 	log = thoughts->log;
-	while (++i < log->size)
+	while (++i < log->queue_size)
 	{
 		printf(FORMAT_MSG , log->queue[i].time, log->queue[i].id, log->msgs[log->queue[i].type]);
 		if (log->queue[i].type == DIE)
 		{
-			log->size = -2000;
-			// printf ("Last meal: [%li] diff: [%li]\n", thoughts->philosophers[log->queue[i].id].last_supper - thoughts->epoch, ((get_time() - thoughts->epoch)) - (thoughts->philosophers[log->queue[i].id].last_supper - thoughts->epoch));
+			log->queue_size = -2000;
+			log->print_size = -2000;
+			printf ("Last meal: [%li] reported: [%li] diff: [%li]\n", thoughts->philosophers[log->queue[i].id].last_supper - thoughts->epoch, log->queue[i].time, ((get_time() - thoughts->epoch)) - (thoughts->philosophers[log->queue[i].id].last_supper - thoughts->epoch));
 			return ;
 		}
 	}
-	log->size -= i;
+	log->queue_size -= i;
+}
+
+void	swap_print_queue(t_log *log)
+{
+	t_msg	*tmp;
+	int		tmp_size;
+
+	tmp = log->queue;
+	tmp_size = log->queue_size;
+
+	log->queue = log->print;
+	log->queue_size = log->print_size;
+	
+	log->print = tmp;
+	log->print_size = tmp_size;
 }
 
 void	*shakespeare(void *param)
@@ -66,10 +83,11 @@ void	*shakespeare(void *param)
 		existance = confirm_reality(thoughts);
 		usleep (500);
 		pthread_mutex_lock(&thoughts->writers_block);
-		print_queue(thoughts);
-		if (log->size > 0)
-			existance = true;
+		swap_print_queue(log);
 		pthread_mutex_unlock(&thoughts->writers_block);
+		print_queue(thoughts);
+		if (log->print_size > 0 || log->queue_size > 0)
+			existance = true;
 	}
 	return (NULL);
 }

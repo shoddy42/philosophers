@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 09:12:24 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/06 15:25:38 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/08 12:51:59 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@
 # define DEFAULT_NB_MEALS 8
 
 # define FORMAT_MSG "%8li %i %s\n"
+# define FORMAT_MSG_FNCY "%8li %i %s\n"
 
 // todo: remove fork2 msg
 // # define FORK_MSG "\1\33[38;5;117mhas taken fork 1\2\1\33[0m\2\3"
@@ -99,32 +100,32 @@ typedef enum e_message_types
 
 typedef struct s_message
 {
-	t_msg_type	type;
+	t_msg_type			type;
 	unsigned long		time;
-	int			id;
+	int					id;
 }	t_msg;
 
-typedef struct s_poetspen
+typedef struct s_log
 {
 	const char	*msgs[7];
 	t_msg		*queue;
-	int			size;
+	t_msg		*print;
+	int			queue_size;
+	int			print_size;
 	int			max;
 }	t_log;
 
 typedef struct s_philosopher
 {
-	pthread_t	thread;
-	t_mutex		*left;
-	t_mutex		*right;
-	t_mutex		soul;
+	pthread_t		thread;
+	t_mutex			*left;
+	t_mutex			*right;
+	t_mutex			soul;
 	
-	unsigned long		last_supper;
-	unsigned long		goal_time;
-	unsigned long		lost_time;
-	int			meals;
-	int			id;
-	t_deep		*thoughts;
+	unsigned long	last_supper;
+	int				meals;
+	int				id;
+	t_deep			*thoughts;
 }	t_phil;
 
 /**

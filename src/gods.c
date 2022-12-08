@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/12/02 04:54:39 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/06 16:12:32 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/08 13:14:12 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,13 @@ bool	thanatos(t_phil *mortal, t_deep *thoughts)
 	{
 		return (false);
 	}
-	printf("\1\33[38;5;196m%8lu %i DED\n", get_time() - thoughts->epoch, mortal->id);
+	printf("\1\33[38;5;196m%8lu %i has THE DED\n", get_time() - thoughts->epoch, mortal->id);
+	// pthread_mutex_lock(&thoughts->writers_block);
+	// thoughts->log->print_size = -2000;
+	// thoughts->log->queue_size = -2000;
+	// pthread_mutex_unlock(&thoughts->writers_block);
 	add_queue(get_time() - thoughts->epoch, DIE, mortal->id, thoughts);
+	// end_universe(thoughts);
 	// printf ("%li %i dead. last? %li\n", (time - thoughts->epoch), mortal->id, mortal->last_supper - thoughts->epoch);
 	// printf ("%li <= %li\n", mortal->last_supper - thoughts->epoch, (unsigned long)thoughts->variables[TT_DIE]);
 	// printf ("?: %li\n", (time - thoughts->epoch) - (mortal->last_supper - thoughts->epoch));
@@ -70,8 +75,8 @@ bool	observe(t_deep *thoughts)
 void	*watch_threads(t_deep *thoughts)
 {
 	// ponder_death(NULL, thoughts, TT_DIE - 1);
-	smart_sleep(thoughts->variables[TT_DIE] - 1);
+	smart_sleep(thoughts->variables[TT_DIE] - 10);
 	while (observe(thoughts))
-		usleep (200);
+		usleep (500);
 	return (NULL);
 }

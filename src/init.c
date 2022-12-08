@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 08:27:04 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/06 15:20:33 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/08 13:21:57 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,12 +78,8 @@ int		init_philo(t_deep *thoughts)
 		if (i > 0)
 			thoughts->philosophers[i].left = thoughts->philosophers[i - 1].right;
 	}
-	// printf ("i = %i\n", i);
 	if (i > 1)
-	{
-		// printf ("SET LEFT!\n");
 		thoughts->philosophers[0].left = thoughts->philosophers[i - 1].right;
-	}
 	else
 		thoughts->philosophers[0].left = NULL;
 	return (0);
@@ -92,9 +88,10 @@ int		init_philo(t_deep *thoughts)
 //later: remove
 void	init_log(t_deep *thoughts)
 {
-	// thoughts->fd = open("philosophers.fd\n", O_CREAT | O_TRUNC | O_RDWR, 0644);
-	// dup2(thoughts->fd, STDOUT_FILENO);
-	thoughts->log = ft_calloc(thoughts->variables[NB_PHILOS] * 100, sizeof(t_log));
+	thoughts->fd = open("philosophers.log\n", O_CREAT | O_TRUNC | O_RDWR, 0644);
+	dup2(thoughts->fd, STDOUT_FILENO);
+	thoughts->log = ft_calloc(1, sizeof(t_log));
+	// thoughts->log->max = 1000;
 	thoughts->log->max = thoughts->variables[NB_PHILOS] * 100;
 	pthread_mutex_init(&thoughts->writers_block, NULL);
 	thoughts->log->msgs[FORK] = FORK_MSG;
@@ -105,8 +102,8 @@ void	init_log(t_deep *thoughts)
 	thoughts->log->msgs[DIE] = DEATH_MSG;
 	// thoughts->log->msgs[END] = FORK_MSG;
 	//todo: experiment with logsize
-	thoughts->log->queue = ft_calloc(1000, sizeof(t_msg));
-	
+	thoughts->log->queue = ft_calloc(thoughts->variables[NB_PHILOS] * 100, sizeof(t_msg));
+	thoughts->log->print = ft_calloc(thoughts->variables[NB_PHILOS] * 100, sizeof(t_msg));
 }
 
 bool	legal_input(int ac, char **av)

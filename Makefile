@@ -6,7 +6,7 @@
 #    By: wkonings <wkonings@student.codam.nl>         +#+                      #
 #                                                    +#+                       #
 #    Created: 2019/10/29 16:21:56 by wkonings      #+#    #+#                  #
-#    Updated: 2022/12/06 15:23:28 by wkonings      ########   odam.nl          #
+#    Updated: 2022/12/08 12:08:34 by wkonings      ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,7 +18,7 @@
 #todo: FLAGS
 NAME = philo
 FLAGS = -Wall -Wextra -Werror -pthread
-DEBUG = -g -fsanitize=thread
+DEBUG = -g -fsanitize=address
 CC = gcc
 
 # --------------- DIRECTORIES ------------ #
