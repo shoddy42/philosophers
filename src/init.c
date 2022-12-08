@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 08:27:04 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/08 15:29:38 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/08 17:53:35 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,8 @@ bool	init_log(t_deep *thoughts)
 	log->msgs[THINK] = THINKING_MSG;
 	log->msgs[DIE] = DEATH_MSG;
 	log->msgs[END] = END_MSG;
+	if (FOOD)
+		init_fancy(thoughts->log);
 	return (0);
 }
 
@@ -74,13 +76,13 @@ bool	init_deepthought(int ac, char **av, t_deep *thoughts)
 	if (legal_input(ac, av) != 0)
 		return (1);
 	vars = thoughts->variables;
-	vars[NB_PHILOS] = ft_atoi(av[NB_PHILOS + 1]);
-	vars[TT_DIE] = ft_atoi(av[TT_DIE + 1]);
-	vars[TT_EAT] = ft_atoi(av[TT_EAT + 1]);
-	vars[TT_SLEEP] = ft_atoi(av[TT_SLEEP + 1]);
+	vars[NB_PHILOS] = ft_atol(av[NB_PHILOS + 1]);
+	vars[TT_DIE] = ft_atol(av[TT_DIE + 1]);
+	vars[TT_EAT] = ft_atol(av[TT_EAT + 1]);
+	vars[TT_SLEEP] = ft_atol(av[TT_SLEEP + 1]);
 	vars[NB_MEALS] = -1;
 	if (ac == 6)
-		vars[NB_MEALS] = ft_atoi(av[NB_MEALS + 1]);
+		vars[NB_MEALS] = ft_atol(av[NB_MEALS + 1]);
 	if (vars[NB_PHILOS] <= 0 || vars[TT_DIE] <= 0 \
 		|| vars[TT_EAT] <= 0 || vars[TT_SLEEP] <= 0)
 		return (init_error("Only arguments above 0 allowed!"));

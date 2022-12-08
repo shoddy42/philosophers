@@ -6,10 +6,9 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 09:12:24 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/08 15:25:14 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/08 17:56:55 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
-
 
 #ifndef PHILOSOPHERS_H
 # define PHILOSOPHERS_H
@@ -20,37 +19,47 @@
 # include <sys/time.h>
 # include <stdio.h>
 # include <limits.h>
-
-// cursed zone
+# include "print.h"
 // # include <fcntl.h> // DBG
-# define DEFAULT_NB_PHILOS 5
-# define DEFAULT_TT_DIE 1100
-# define DEFAULT_TT_EAT 580
-# define DEFAULT_TT_SLEEP 500
-# define DEFAULT_NB_MEALS 8
 
-# define FORMAT_MSG "%8li %i %s\n"
-# define FORMAT_MSG_FNCY "%8li %i %s\n"
-
-// todo: remove fork2 msg
-// # define FORK_MSG "\1\33[38;5;117mhas taken fork 1\2\1\33[0m\2\3"
-// # define FORK2_MSG "\1\33[38;5;117mhas taken fork 2\2\1\33[0m\2\3"
-// # define EATING_MSG "\1\33[38;5;198mis eating\2\1\33[0m\2\3"
-// # define SLEEPING_MSG "\1\33[38;5;135mis sleeping\2\1\33[0m\2\3"
-// # define THINKING_MSG "\1\33[38;5;27mis thinking\2\1\33[0m\2\3"
-// # define DEATH_MSG "\1\33[38;5;196mhas died\2\3"
-
-# define FORK_MSG "has taken fork 1"
-# define FORK2_MSG "has taken fork 2"
-# define EATING_MSG "is eating"
-# define SLEEPING_MSG "is sleeping"
-# define THINKING_MSG "is thinking"
-# define DEATH_MSG "has died"
-# define END_MSG "Simulation succesful!"
-
-// end of cursed zone
 typedef struct s_deepthought	t_deep;
 typedef pthread_mutex_t			t_mutex;
+
+# define STATES 3
+/**
+ * @brief The three state types a philosopher can be in.
+ */
+typedef enum e_state
+{
+	EATING,
+	SLEEPING,
+	THINKING,
+}	t_state;
+
+/**
+ * @brief The main philosopher struct.
+ * 
+ * @param thread	The thread that represents the philosopher.
+ * @param right		The right fork (mutex) is the philosophers own fork.
+ * @param left		The left fork (mutex) is the left neighbor's fork.
+ * @param soul		This mutex is what prevents dataraces within the philo
+ * @param last_supper	The last time a philosopher ate.
+ * @param meals			The amount of meals the philosopher has consumed.
+ * @param id			The philosopher's ID (number that represents them)
+ * @param thoughts		A pointer to the main t_deep *thoughts struct.
+ */
+typedef struct s_philosopher
+{
+	pthread_t		thread;
+	t_mutex			*right;
+	t_mutex			*left;
+	t_mutex			soul;
+
+	unsigned long	last_supper;
+	int				meals;
+	int				id;
+	t_deep			*thoughts;
+}	t_phil;
 
 /** 
  * @brief	Enumerators for clarity when accessing the simulations variables.
@@ -71,116 +80,70 @@ enum e_variables
 	NB_MEALS,
 };
 
-typedef enum e_state
-{
-	EATING,
-	SLEEPING,
-	THINKING,
-}	t_state;
-
-typedef enum e_message_types
-{
-	FORK,
-	FORK2,
-	EAT,
-	SLEEP,
-	THINK,
-	DIE,
-	END
-} t_msg_type;
-
-typedef struct s_message
-{
-	t_msg_type			type;
-	unsigned long		time;
-	int					id;
-}	t_msg;
-
-typedef struct s_log
-{
-	const char	*msgs[7];
-	t_msg		*queue;
-	t_msg		*print;
-	int			queue_size;
-	int			print_size;
-	int			max;
-}	t_log;
-
-typedef struct s_philosopher
-{
-	pthread_t		thread;
-	t_mutex			*left;
-	t_mutex			*right;
-	t_mutex			soul;
-
-	unsigned long	last_supper;
-	int				meals;
-	int				id;
-	t_deep			*thoughts;
-}	t_phil;
-
 /**
- * @brief	The main program data for philosophers
- * @param	variables[5] Contains variables that affect the simulation,
- * 						 defined by e_variables
- * @param	philosophers Has pointers to all philosophers in the simulation.
- * 
+ * @brief The main program data for philosophers
+ * @param philos	Has pointers to all philosophers in the simulation.
+ * @param shakespeare The writing thread.
+ * @param writers_block The mutex protecting shakespeare.
+ * @param log	t_log struct containing all that shakespeare needs to write.
+ * @param ------
+ * @param sync		Mutex to assure synchronised start.
+ * @param epoch		The starting time of the simulation.
+ * @param satisfied	The amount of philosophers that have eaten enough.
+ * @param oblivion	Turns true when simulation ends.
+ * @param variables[5] Contains variables that affect the simulation,
+ * 		 			 defined by e_variables
  */
 typedef struct s_deepthought
 {
-	long			variables[5];
 	t_phil			*philos;
 	unsigned long	epoch;
+	t_mutex			sync;
 
 	pthread_t		shakespeare;
 	t_mutex			writers_block;
 	t_log			*log;
 
-	t_mutex			sync;
-
+	long			variables[5];
 	int				satisfied;
 	bool			oblivion;
-
 	int				fd;
 }	t_deep;
 
 // philosophers.c
-void	*yes(void *param);
-bool	confirm_reality(t_deep *thoughts);
-void	end_universe(t_deep *thoughts);
-bool	ponder_death(t_phil *philo, t_deep *thoughts, int time);
-bool	confirm_reality(t_deep *thoughts);
+bool			confirm_reality(t_deep *thoughts);
+void			*life(void *param);
 
 // utils.c
-void	*ft_calloc(size_t count, size_t size);
-int		ft_atoi(const char *nb);
-void	get_forks(t_phil *philo, t_deep *thoughts);
+void			better_sleep(unsigned long duration);
 unsigned long	get_time(void);
+void			*ft_calloc(size_t count, size_t size);
+long			ft_atol(const char *nb);
 
 // init.c
-bool	init_deepthought(int ac, char **av, t_deep *thoughts);
-bool	init_time(t_deep *thoughts);
-bool	create_threads(t_deep *thoughts);
-bool	join_threads(t_deep *thoughts);
-bool	destroy_forks(t_deep *thoughts);
-bool	init_philosophers(int ac, char **av, t_deep *thoughts);
-bool	init_log(t_deep *thoughts);
-
+bool			init_deepthought(int ac, char **av, t_deep *thoughts);
+bool			init_time(t_deep *thoughts);
+bool			init_philosophers(int ac, char **av, t_deep *thoughts);
+bool			init_log(t_deep *thoughts);
 
 // gods.c
-void	*watch_threads(t_deep *thoughts);
+void			*watch_threads(t_deep *thoughts);
+void			end_universe(t_deep *thoughts);
 
 // poet.c
-void	*shakespeare(void *param);
-void	add_queue(unsigned long time, t_msg_type type, int id, t_deep *thoughts);
-
-
-// sleep.c
-void	smart_sleep(unsigned long duration);
+void			*shakespeare(void *param);
+void			add_queue(unsigned long time, t_msg_type type, \
+					int id, t_deep *thoughts);
 
 // init_utils.c
-bool	init_error(char *error_msg);
-bool	legal_input(int ac, char **av);
+bool			init_error(char *error_msg);
+bool			legal_input(int ac, char **av);
+bool			create_threads(t_deep *thoughts);
+bool			join_threads(t_deep *thoughts);
+bool			destroy_forks(t_deep *thoughts);
 
+// fancy.c
+const char		*random_food(t_log *log);
+void			init_fancy(t_log *log);
 
 #endif

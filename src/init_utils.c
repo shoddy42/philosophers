@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/12/08 14:50:47 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/08 15:18:56 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/08 17:48:12 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,13 @@ bool	init_error(char *error_msg)
 	return (EXIT_FAILURE);
 }
 
+/**
+ * @brief 
+ * 
+ * @param ac ac from main.
+ * @param av av from main.
+ * @return 0 if input is legal. init_error else. 
+ */
 bool	legal_input(int ac, char **av)
 {
 	int	i;
@@ -47,9 +54,11 @@ bool	create_threads(t_deep *thoughts)
 	i = -1;
 	philo = thoughts->philos;
 	while (++i < thoughts->variables[NB_PHILOS])
-		if (pthread_create(&philo[i].thread, NULL, yes, (void *)&philo[i]) != 0)
+		if (pthread_create(&philo[i].thread, NULL,
+				life, (void *)&philo[i]) != 0)
 			return (init_error("Failed to create thread."));
-	if (pthread_create(&thoughts->shakespeare, NULL, &shakespeare, thoughts) != 0)
+	if (pthread_create(&thoughts->shakespeare,
+			NULL, &shakespeare, thoughts) != 0)
 		return (init_error("Failed to create shakespeare."));
 	return (0);
 }
@@ -62,10 +71,10 @@ bool	join_threads(t_deep *thoughts)
 	i = -1;
 	philo = thoughts->philos;
 	while (++i < thoughts->variables[NB_PHILOS])
-	{
-		pthread_join(philo[i].thread, NULL);
-	}
-	pthread_join(thoughts->shakespeare, NULL);
+		if (pthread_join(philo[i].thread, NULL) != 0)
+			return (init_error("Failed to join thread!"));
+	if (pthread_join(thoughts->shakespeare, NULL) != 0)
+		return (init_error("Failed to join shakespeare."));
 	return (0);
 }
 
@@ -79,7 +88,9 @@ bool	destroy_forks(t_deep *thoughts)
 	while (++i < thoughts->variables[NB_PHILOS])
 	{
 		pthread_mutex_destroy(thoughts->philos->right);
+		pthread_mutex_destroy(&thoughts->philos->soul);
 	}
-	// pthread_join(thoughts->shakespeare, NULL);
+	pthread_mutex_destroy(&thoughts->writers_block);
+	pthread_mutex_destroy(&thoughts->sync);
 	return (0);
 }

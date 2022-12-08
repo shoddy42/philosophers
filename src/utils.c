@@ -6,11 +6,34 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/11/14 06:53:35 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/08 12:14:49 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/08 17:53:58 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/philosophers.h"
+
+void	better_sleep(unsigned long duration)
+{
+	unsigned long	goal;
+	unsigned long	now;
+	unsigned long	delta;
+
+	goal = get_time() + duration;
+	while (true)
+	{
+		now = get_time();
+		if (now >= goal)
+			return ;
+		delta = goal - now;
+		if (delta <= 1)
+		{
+			while (get_time() < goal)
+				usleep(200);
+			return ;
+		}
+		usleep((delta * 2) / 3);
+	}
+}
 
 unsigned long	get_time(void)
 {
@@ -42,16 +65,16 @@ void	*ft_calloc(size_t count, size_t size)
 }
 
 /**
- * @brief Turns a string into an integer.
+ * @brief Turns a string into a long.
  * 
  * @param nb the string to be converted.
- * @return @b [int] 
+ * @return @b [long] 
  */
-int	ft_atoi(const char *nb)
+long	ft_atol(const char *nb)
 {
-	int				i;
+	long			i;
 	unsigned long	r;
-	int				sign;
+	long			sign;
 
 	i = 0;
 	r = 0;
@@ -68,27 +91,5 @@ int	ft_atoi(const char *nb)
 		r = (r * 10) + (nb[i] - '0');
 		i++;
 	}
-	return ((int)(r * sign));
-}
-
-void	get_forks(t_phil *philo, t_deep *thoughts)
-{
-	if (philo->id % 2)
-	{
-		pthread_mutex_lock(philo->left);
-		add_queue(get_time() - thoughts->epoch, FORK, philo->id, thoughts);
-		// printf ("%li [%i] picked up fork2\n", (get_time() - thoughts->epoch) / 1000, philo->id);
-
-		pthread_mutex_lock(philo->right);
-		add_queue(get_time() - thoughts->epoch, FORK2, philo->id, thoughts);
-	}
-	else
-	{
-		pthread_mutex_lock(philo->left);
-		add_queue(get_time() - thoughts->epoch, FORK, philo->id, thoughts);
-		// printf ("%li [%i] picked up fork2\n", (get_time() - thoughts->epoch) / 1000, philo->id);
-
-		pthread_mutex_lock(philo->right);
-		add_queue(get_time() - thoughts->epoch, FORK2, philo->id, thoughts);	
-	}
+	return ((long)(r * sign));
 }

@@ -6,7 +6,7 @@
 /*   By: wkonings <wkonings@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2022/12/02 06:09:09 by wkonings      #+#    #+#                 */
-/*   Updated: 2022/12/08 15:03:16 by wkonings      ########   odam.nl         */
+/*   Updated: 2022/12/08 17:52:07 by wkonings      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,29 +42,31 @@ static void	print_queue(t_deep *thoughts)
 	log = thoughts->log;
 	while (++i < log->queue_size)
 	{
-		printf(FORMAT_MSG , log->queue[i].time, log->queue[i].id, log->msgs[log->queue[i].type]);
+		if (log->queue[i].type == EAT && FOOD)
+			printf(FORMAT_EAT, log->queue[i].time, log->queue[i].id,
+				log->msgs[log->queue[i].type], random_food(log));
+		else
+			printf(FORMAT_MSG, log->queue[i].time, log->queue[i].id,
+				log->msgs[log->queue[i].type]);
 		if (log->queue[i].type == DIE)
 		{
 			log->queue_size = -2000;
 			log->print_size = -2000;
-			printf ("Last meal: [%li] reported: [%li] diff: [%li]\n", thoughts->philos[log->queue[i].id].last_supper - thoughts->epoch, log->queue[i].time, ((get_time() - thoughts->epoch)) - (thoughts->philos[log->queue[i].id].last_supper - thoughts->epoch));
 			return ;
 		}
 	}
 	log->queue_size -= i;
 }
 
-void	swap_print_queue(t_log *log)
+static void	swap_print_queue(t_log *log)
 {
 	t_msg	*tmp;
 	int		tmp_size;
 
 	tmp = log->queue;
 	tmp_size = log->queue_size;
-
 	log->queue = log->print;
 	log->queue_size = log->print_size;
-	
 	log->print = tmp;
 	log->print_size = tmp_size;
 }
